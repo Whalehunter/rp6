@@ -50,11 +50,11 @@ int main(void)
 
 
 void toggle_links(){
-		PORTB ^= PORTB;
+		PORTB ^= (1<<PINB7);
 }
 
 void toggle_rechts(){
-		PORTC ^= PORTC;
+		PORTC ^= (1<<PINC4);
 }
 
 
