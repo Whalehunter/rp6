@@ -25,26 +25,28 @@ void toggle_rechts();
 int main(void)
 {
 	sei();
-	DDRB |= 0b10000000; // Stel pb7 in als output
-	DDRC |= 0b00010000; // Stel pc4 in als output
+	DDRB = 0b10000000; // Stel pb7 in als output
+	DDRC = 0b00010000; // Stel pc4 in als output
 	
 	// Instellen van Timer compare registers 
 	TIMSK = (1<<TOIE0); // Timer overflow interrupt bitje
 	TCCR0 |= (1<<COM00); // Timer control register COM00 - toggle oc0a on compare match
 	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 78.
-	OCR0 = 78; // OUtput compare ingesteld op 78 (80000/1024)
+	OCR0 = 178; // OUtput compare ingesteld op 78 (80000/1024)
 	
 	
 	while (1) 
     {
-		if (timert(0)%1000==0){
+		/*if (timert(0)%1000==0){
 			toggle_links();	
 			toggle_rechts();
-		}
+		}*/
 		/*if (timert(0)%100==0){
 			PORTB &= ~(1<<PINB7);
 			PORTC &= ~(1<<PINC4); 
 		}*/
+		PORTB |= (1<<PINB7);
+		PORTC &= ~(1<<PINC4);
 	}
 }
 
