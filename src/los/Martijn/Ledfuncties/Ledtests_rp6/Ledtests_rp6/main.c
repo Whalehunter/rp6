@@ -24,6 +24,7 @@ void toggle_rechts();
 
 int main(void)
 {
+	sei();
 	PORTB |= 0b10000000; // Stel pb7 in als output
 	PORTC |= 0b00010000; // Stel pc4 in als output
 	
