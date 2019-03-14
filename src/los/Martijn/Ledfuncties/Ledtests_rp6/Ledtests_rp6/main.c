@@ -37,16 +37,15 @@ int main(void)
 	
 	while (1) 
     {
-		/*if (timert(0)%1000==0){
+		if (timert(0)%1000==0){
 			toggle_links();	
 			toggle_rechts();
-		}*/
+		}
 		/*if (timert(0)%100==0){
 			PORTB &= ~(1<<PINB7);
 			PORTC &= ~(1<<PINC4); 
 		}*/
-		PORTB |= (1<<PINB7);
-		PORTC &= ~(1<<PINC4);
+
 	}
 }
 
