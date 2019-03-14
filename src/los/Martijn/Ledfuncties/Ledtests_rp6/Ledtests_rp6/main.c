@@ -25,8 +25,8 @@ void toggle_rechts();
 int main(void)
 {
 	sei();
-	PORTB |= 0b10000000; // Stel pb7 in als output
-	PORTC |= 0b00010000; // Stel pc4 in als output
+	DDRB |= 0b10000000; // Stel pb7 in als output
+	DDRC |= 0b00010000; // Stel pc4 in als output
 	
 	// Instellen van Timer compare registers 
 	TIMSK = (1<<TOIE0); // Timer overflow interrupt bitje
