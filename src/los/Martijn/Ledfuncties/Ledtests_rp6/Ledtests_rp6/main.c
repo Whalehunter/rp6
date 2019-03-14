@@ -8,7 +8,6 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <util/delay.h>
 #include <avr/interrupt.h>
 
 /*#define SL1 (1<<PINC6) // Red Right Led1
@@ -18,7 +17,9 @@
 #define SL5 (1<<PINB1) // Red Left Led2
 #define SL6 (1<<PINB0) // Red Left Led3
 */
-
+uint64_t timert(int x);
+void toggle_links();
+void toggle_rechts();
 
 
 int main(void)
@@ -26,8 +27,7 @@ int main(void)
 	PORTB |= 0b10000000; // Stel pb7 in als output
 	PORTC |= 0b00010000; // Stel pc4 in als output
 	
-	// Instellen van Timer compare registers
-	WGM01 = 0; // Stel waveform generation moden op normal mode     
+	// Instellen van Timer compare registers 
 	TIMSK = (1<<TOIE0); // Timer overflow interrupt bitje
 	TCCR0 |= (1<<COM00); // Timer control register COM00 - toggle oc0a on compare match
 	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 78.
@@ -36,40 +36,40 @@ int main(void)
 	
 	while (1) 
     {
-		ledknipper_links();
-		_delay_ms(1000);
-		ledknipper_rechts();
-		_delay_ms(1000);
-    }
+		if (timert(0)%10==0){
+			toggle_links();	
+		}
+		if (timert(0)%10==0){
+			toggle_rechts();
+		}
+		if (timert(0)%100==0){
+			PORTB &= ~(1<<PINB7);
+			PORTC &= ~(1<<PINC4); 
+		}
+	}
 }
 
 
-void ledknipper_links(){
-	for (int i=0; i<8; i++){
+void toggle_links(){
 		PORTB ^= (1<<PINB7);
-		TIMER0_OVF_vect
-	}
-	PORTB &= ~(1<<PINB7);
 }
 
-void ledknipper_rechts(){
-	for (int i=0; i<8;i++){
+void toggle_rechts(){
 		PORTC ^= (1<<PINC4);
-		TIMER0_OVF_vect
-	}
-	PORTC &= ~(1<<PINC4); 
 }
 
 
-void timer(int i)
+uint64_t timert(int x)
 {
-	TIMSK = (1<<TOIE0); // Timer overflow interrupt bitje
-	TCCR0 |= (1<<COM00); // Timer control register COM00 - toggle oc0a on compare match
+	static uint64_t i =0;
+	if (x){
+		return i++;
+	}
+	return i;
 	
 }
 
 ISR(TIMER0_OVF_vect) // Interrupt Service Routine 
 {
-	
-	
+	timert(1);
 }
