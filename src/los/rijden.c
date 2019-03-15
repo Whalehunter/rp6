@@ -10,7 +10,7 @@ main() {
     init();
 
     while(1) {
-        drive();
+        drive(&motor);
     }
 }
 
