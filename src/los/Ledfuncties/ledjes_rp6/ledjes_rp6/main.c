@@ -34,7 +34,7 @@ int main(void)
 	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
 	OCR0 = 77; // OUtput compare ingesteld op 77 (80000/1024)
 	
-	
+
 	while (1) 
     {
 		toggle_links();
