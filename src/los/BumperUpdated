@@ -1,0 +1,42 @@
+/*
+ * BumpersUpdated.c
+ *
+ * Created: 15-3-2019 15:01:23
+ * Author : Björn van Lieshout
+ */ 
+
+#include <avr/io.h>
+#include <stdbool.h>
+
+ int main ()
+{
+  //deze regels code moeten in de robot main staan
+  DDRB &= ~(1<<PINB0); // instellen als input
+  PORTB |= (1<<PINB0); // inschakelen van pull_up resistor
+  
+  while (bumperklik())
+  {
+    if(bumperklik())
+    {
+      //functie om te stoppen
+    
+    }
+  }
+  return 1;   
+}
+
+int bumperklik()
+{
+  //dit moet als functie buiten de robot main
+while (1)
+{
+  if (  !(PORTB = ~(1 << PINB0)) || !(PORTC = ~(1 << PINC6)) )
+  {
+    _delay_ms(5);
+    if ( !(PORTB = ~(1 << PINB0)) ||!(PORTC = ~(1 << PINC6)) )
+    {
+    return 1;
+    }
+  }
+}
+}
