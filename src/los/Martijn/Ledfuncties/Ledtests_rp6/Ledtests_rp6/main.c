@@ -30,6 +30,9 @@ int main(void)
 	WGM01 = 0; // Stel waveform generation moden op normal mode     
 	TIMSK = (1<<TOIE0); // Timer overflow interrupt bitje
 	TCCR0 |= (1<<COM00); // Timer control register COM00 - toggle oc0a on compare match
+	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 78.
+	OCR0 = 78; // OUtput compare ingesteld op 78 (80000/1024)
+	
 	
 	while (1) 
     {
@@ -67,7 +70,6 @@ void timer(int i)
 
 ISR(TIMER0_OVF_vect) // Interrupt Service Routine 
 {
-	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 78.
-	OCR0 = 78; // OUtput compare ingesteld op 78 (80000/1024)
+	
 	
 }
