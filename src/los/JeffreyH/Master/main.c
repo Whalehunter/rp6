@@ -58,17 +58,17 @@ ISR(USART_RX_vect){
 	x = UDR0;
 	switch(x){
 		case 'a':
-    	i2c_write(x); i2c_read(); break;
-    	case 'w':
-    	i2c_write(x); i2c_read(); break;
-    	case 'd':
-    	i2c_write(x); i2c_read(); break;
-    	case 's':
-    	i2c_write(x); i2c_read(); break;
+		i2c_write(x); i2c_read(); break;
+		case 'w':
+		i2c_write(x); i2c_read(); break;
+		case 'd':
+		i2c_write(x); i2c_read(); break;
+		case 's':
+		i2c_write(x); i2c_read(); break;
 		case 'x':
 		sonar = !sonar; break;
-    	default:
-    	i2c_write(x); break;
+		default:
+		i2c_write(x); break;
 	}
 }
 
