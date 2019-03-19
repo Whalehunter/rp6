@@ -55,21 +55,21 @@ ISR(TIMER1_OVF_vect) {
 }
 
 ISR(USART_RX_vect){
-  x = UDR0;
-  switch(x){
-    case 'a':
-    i2c_write(x); i2c_read(); break;
-    case 'w':
-    i2c_write(x); i2c_read(); break;
-    case 'd':
-    i2c_write(x); i2c_read(); break;
-    case 's':
-    i2c_write(x); i2c_read(); break;
-	case 'x':
-	sonar = !sonar; break;
-    default:
-    i2c_write(x); break;
-  }
+	x = UDR0;
+	switch(x){
+		case 'a':
+    	i2c_write(x); i2c_read(); break;
+    	case 'w':
+    	i2c_write(x); i2c_read(); break;
+    	case 'd':
+    	i2c_write(x); i2c_read(); break;
+    	case 's':
+    	i2c_write(x); i2c_read(); break;
+		case 'x':
+		sonar = !sonar; break;
+    	default:
+    	i2c_write(x); break;
+	}
 }
 
 void sonarSensor(){
