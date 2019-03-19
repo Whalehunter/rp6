@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+// String Array gemaakt om zo de omschrijving van de richting aan te geven.
+const char *richting[] = {
+  "Noord",
+  "Noord-Oost",
+  "Oost",
+  "Zuid-Oost",
+  "Zuid",
+  "Zuid-West",
+  "West",
+  "Noord-West",
+  "Fout"
+};
+// Testen van de functie
+int main(void)
+{	
+	int fd;														// File descrition
+	// For older raspberry pi modules use "/dev/i2c-0" instead of "/dev/i2c-1" for the i2c port
+	char *fileName = "/dev/i2c-1";								// Name of the port we will be using
+	int  address = 0x60;										// Address of CMPS03 shifted right one bit
+	unsigned char buf[10];										// Buffer for data being read/ written on the i2c bus
+	
+	if ((fd = open(fileName, O_RDWR)) < 0) {					// Open port for reading and writing
+		printf("Failed to open i2c port\n");
+		exit(1);
+	}
+	
+	if (ioctl(fd, I2C_SLAVE, address) < 0) {					// Set the port options and set the address of the device we wish to speak to
+		printf("Unable to get bus access to talk to slave\n");
+		exit(1);
+	}
+		
+	buf[0] = 0;													// This is the register we want to read from
+	
+	if ((write(fd, buf, 1)) != 1) {								// Send register we want to read from	
+		printf("Error writing to i2c slave\n");
+		exit(1);
+	}
+	
+	if (read(fd, buf, 4) != 4) {								// Read back data into buf[]
+		printf("Unable to read from slave\n");
+		exit(1);
+	}
+	else {
+		unsigned char highByte = buf[2];
+		unsigned char lowByte = buf[3];
+		unsigned int graden = (highByte <<8) + lowByte/10;	
+		prinft("%s", richting[graden()])
+	}
+	
+	
+	return 0;
+}
+// Delen van de 360 graden cirkel op in stukjes van 45graden. 
+// De module geeft waardes tussen 0-3599.
+// Door deze deling komen er 8 stukken vrij. Het 8ste stuk zou ook bij Noord horen, dit opgelost door
+// een if aan te maken.
+int test(int graden)
+{	
+	if ((graden < 0)
+		|| (graden > 3599)){
+			return 8;
+		}
+	// 450.0 gebruikt want anders is er een integer deling en krijg je afrondings problemen.	
+	float part = graden / 450.0;
+	int wijzerindex = (int)(round(part));
+	if (wijzerindex == 8)
+	{ 
+		return 0;
+	} else 
+	{	
+		return wijzerindex;
+	}
+
+}
