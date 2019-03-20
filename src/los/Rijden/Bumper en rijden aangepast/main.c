@@ -1,8 +1,12 @@
-#include <stdio.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
-
 #define F_CPU 8000000
+
+#include <avr/io.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
 
 //TERMINAL COMMUNICATIE
 #define BAUD_LOW 38400 
@@ -15,6 +19,67 @@
 #define DEC 10
 #define OCT 8
 #define BIN 2
+
+// Declarations of functions
+int timer_counter(uint64_t inc);
+void cycleDelay(volatile unsigned long cd);
+void init();
+void goLinks();
+void goRechts();
+void goAchteruit();
+void goVooruit();
+int bumpers();
+int  BumperStatusLinks();
+int BumperStatusRechts();
+void init_usart();
+int leescommand();
+
+
+
+int main (void){
+	// Initialisers
+	cli();
+	init();
+	init_usart();
+	sei();
+	while(1)
+	{
+
+		if(leescommand() == 49) // Als de invoer gelijk is aan 1
+		{
+			PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
+			PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+			OCR1A = 0x50;//dit zet de motoren aan
+			OCR1B  = 0x50;
+		}
+		if (leescommand() == 50) // Als de invoer gelijk is aan 2
+		{
+			PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
+			PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+			OCR1A = 0x50;//dit zet de motoren aan
+			OCR1B  = 0x50;
+		}
+		
+	}
+}
+
+
+// Functions used:
+void init_usart(){
+	UCSRA = 0; // USART status and control registerA uit
+	UCSRB = (1 << RXEN); // Enable de USART Reciever
+	UCSRC = (1 << UCSZ1) | (1 << UCSZ0); /* 8 data bits, 1 stop bit */
+	UBRRH = 00;
+	UBRRL = 12; //baudrade 38.4K. voor robotloader
+}
+
+
+int leescommand(){
+	int getal;
+	while(~UCSRA & (1<<RXC));
+	getal = UDR;
+	return getal;
+}
 
 int timer_counter(uint64_t inc) {
 	static uint64_t i = 1;
@@ -40,80 +105,8 @@ void init()
 	ICR1 = 0x00FF;
 	TIMSK |= (1 << TOIE0);
 	DDRC |= (1 << PINC2) | (1 << PINC3);
-	
-	int i = 10;
-	
-	while (1)
-	{
-		if(i == 20) 
-		{
-				PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-				PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-				OCR1A = 0x50;//dit zet de motoren aan
-				OCR1B  = 0x50;
-		}
-		if (i == 10)
-		{
-			PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
-			PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-			OCR1A = 0x50;//dit zet de motoren aan
-			OCR1B  = 0x50;
-		}
-		
-	}
-	
-		
-	/*
-	PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-	PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-	OCR1A = 0x50;//dit zet de motoren aan
-	OCR1B  = 0x50;
-    */
-	
-	
-	/* Snelheden:
-	0xB4 = 180, TOPSNELHEID
-	0X7D = 125, GEMIDDELDE SNELHEID
-	0x0050 = 50, LANGZAAM
-	*/	
 }
 
-
-void goLinks()
-{
-	DDRC |= (1 << PINC2) | (1 << PINC3);
-	PORTC  &= (1 << PINC3);
-	PORTC &= (1 << PINC2);
-	
-
-	PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-	PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-	OCR1A = 0x7D;//dit zet de motoren aan met de snelheid
-	OCR1B  = 0x50;
-	
-}
-void goRechts()
-{
-		
-	PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-	PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-	OCR1A = 0x50;//dit zet de motoren aan
-	OCR1B  = 0x7D;
-}
-void goAchteruit()
-{
-	PORTC |= (1 << PINC2);   //Defined of hij achteruit gaat
-	PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-	OCR1A = 0x50;//dit zet de motoren aan
-	OCR1B  = 0x50;
-}
-void goVooruit()
-{
-	PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-	PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-	OCR1A = 0x50;//dit zet de motoren aan
-	OCR1B  = 0x50;
-}
 
 
 ISR(TIMER1_COMPA_vect)
@@ -125,17 +118,6 @@ ISR(TIMER1_COMPB_vect)
 timer_counter(1);
 }
 
-/*
-void MotorSturen()
-{
-	DDRC |= (1 << PINC2) | (1 << PINC3);
-	PORTC  &= (1 << PINC3);
-	PORTC &= (1 << PINC2);
-	
-	DDRD |= 0xff;
-	DDRC = 0xff;
-}
-*/
 
 int BumperStatusLinks()
 {
@@ -207,14 +189,3 @@ int bumpers (void)
 	return 0;
 }
 
-int main()
-{
-	cli();
-	init();
-    bumpers();
-	//goLinks();
-	
-
-	
-	sei();
-}

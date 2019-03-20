@@ -60,7 +60,7 @@ void init_usart(){
 }
 
 void init_hardware(){
-	DDRB = 0b00001111; // Portb Pinb 50/51/52/53 set on output (leds)
+	DDRB = 0x10; // Portb Pinb 50/51/52/53 set on output (leds)
 }
 
 int leescommand(){
