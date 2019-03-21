@@ -33,7 +33,8 @@ int BumperStatusRechts();
 void init_usart();
 int leescommand();
 void rijden();
-int snelheidlees();
+
+int snelheid;
 
 
 
@@ -47,8 +48,7 @@ int main (void){
 	
 	while(1)
 	{
-		volatile int snelheid = snelheidlees();
-		rijden(snelheid);
+		rijden();
 	}
 return 0;
 }
@@ -71,37 +71,51 @@ int leescommand(){
 	return getal;
 }
 
-void rijden(int x){
-	volatile int command = leescommand();
+void rijden(){
+	uint8_t command = leescommand();
+	if (command == '1')
+	{
+		snelheid = 50;
+	}
+	if (command == '2')
+	{
+		snelheid = 125;
+	}
+	if (command == '3')
+	{
+		snelheid = 150;
+	}
+	
+	
 	if(command == 'w') // ga VOORUIT als invoer w is
 	{
 		PORTC &= (1 << PINC2);
 		PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-		OCR1A = x;//dit zet de motoren aan
-		OCR1B  = x;
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
 	}
 	
 	if (command == 'a') // ga LINKSAF als invoer a is
 	{
 		PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
 		PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-		OCR1A = x;//dit zet de motoren aan
-		OCR1B  = x;
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
 	}
 	if (command == 's') // ga ACHTERUIT als invoer s is
 	{
 		PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
 		PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-		OCR1A = x;//dit zet de motoren aan
-		OCR1B  = x;
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
 	}
 	
 	if (command == 'd') // ga RECHTSAF als invoer d is
 	{
 		PORTC &= ~(1 << PINC2);   //Defined dat hij achteruit gaat
 		PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-		OCR1A = x;//dit zet de motoren aan
-		OCR1B  = x;
+		OCR1A = 0x50;//dit zet de motoren aan
+		OCR1B  = 0x50;
 	}
 	if (command == 'q') // q for quit
 	{
@@ -110,22 +124,6 @@ void rijden(int x){
 	}
 }
 
-int snelheidlees(){
-	volatile int snelheid = leescommand();
-	if (snelheid == 1)
-	{
-		return 50;
-	}
-	if (snelheid == 2)
-	{
-		return 125;
-	}
-	if (snelheid == 3)
-	{
-		return 180;
-	}
-	return 0;
-}
 
 int timer_counter(uint64_t inc) {
 	static uint64_t i = 1;
