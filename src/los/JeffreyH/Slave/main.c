@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+
 #define SLA 56
 
 char x, y;
@@ -32,13 +33,13 @@ ISR(TWI_vect) {
 void i2cFunctions(char a){
 	switch(a){
 		case 'a':
-		TWDR = '<'; TWCR |= (1 << TWINT); break;
+		TWDR = '<'; break;
 		case 'd':
-		TWDR = '>'; TWCR |= (1 << TWINT); break;
+		TWDR = '>'; break;
 		case 'w':
-		TWDR = '^'; TWCR |= (1 << TWINT); break;
+		TWDR = '^'; break;
 		case 's':
-		TWDR = '.'; TWCR |= (1 << TWINT); break;
+		TWDR = '.'; break;
 		default: break;
 	}
 }
