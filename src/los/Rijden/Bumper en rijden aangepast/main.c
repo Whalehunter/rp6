@@ -33,8 +33,7 @@ int BumperStatusRechts();
 void init_usart();
 int leescommand();
 void rijden();
-
-int snelheid;
+//int leessnelheid();
 
 
 
@@ -71,19 +70,33 @@ int leescommand(){
 	return getal;
 }
 
+/*
+int leessnelheid(){
+	int snelheid;
+	while(~UCSRA & (1<<RXC));
+	snelheid = UDR;
+	return snelheid;
+*/	
+
 void rijden(){
 	uint8_t command = leescommand();
+	//uint8_t commands = leessnelheid();
+	static int laatste_snelheid;
+	 int snelheid = laatste_snelheid;
+	
+	
 	if (command == '1')
 	{
-		snelheid = 50;
+	//	commands = 50;
+		laatste_snelheid = 50;
 	}
 	if (command == '2')
 	{
-		snelheid = 125;
+		laatste_snelheid = 125;
 	}
 	if (command == '3')
 	{
-		snelheid = 150;
+		laatste_snelheid = 150;
 	}
 	
 	
