@@ -34,25 +34,6 @@ void knipper_licht_uit();
 
 int main(void)
 {
-<<<<<<< HEAD
-	sei();
-	DDRB = 0b10000000; // Stel pb7 in als output
-	DDRC = 0b00010000; // Stel pc4 in als output
-	
-	// Instellen van Timer compare registers 
-	TIMSK = (1<<OCIE0); // Timer overflow interrupt bitje
-	TCCR0 = (1<<COM00) | (1<<WGM01); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
-	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
-	OCR0 = 254; // OUtput compare ingesteld op 77 (80000/1024)
-	
-
-	while (1) 
-    {
-		//toggle_links();
-		//toggle_rechts();
-	}	
-	return 0;
-=======
     sei();
     DDRB = 0b10000000; // Stel pb7 in als output
     DDRC = 0b00010000; // Stel pc4 in als output
@@ -69,7 +50,6 @@ int main(void)
         toggle_rechts();
     }
     return 0;
->>>>>>> f28c583c5f0e012ff938f6e71a2b58f64b0dae7a
 }
 
 void toggle_links(){
@@ -82,37 +62,9 @@ void toggle_rechts(){
     if (timert(0)){
         PORTC ^= 0b00010000;
     }
-
-    /*static int aan = 1;
-      static int temp =1;
-
-      if (timert(0) && aan && temp){
-      PORTC |= (1<<PINC4);
-      aan =0;
-      }
-      if (timert(0) && !aan && !temp){
-      PORTC &= ~(1<<PINC4);
-      aan =1;
-      }
-      temp = !temp;*/
 }
 
-<<<<<<< HEAD
-/*uint64_t timert(int x)
-{
-	static uint64_t i =0;
-	if (x){
-		return i++;
-	}
-	if (i>1000){
-		i=0;
-	}
-	return i;
-	
-}*/
 
-/* ISR(TIMER0_COMP_vect) // Interrupt Service Routine 
-=======
 void knipper_licht_uit() {
     /* Links uit */
     PORTB &= ~(1<<PINB7);
@@ -122,7 +74,7 @@ void knipper_licht_uit() {
 
 
 uint8_t timert(int x)
->>>>>>> f28c583c5f0e012ff938f6e71a2b58f64b0dae7a
+
 {
     static uint8_t delay = 0;
 
@@ -138,16 +90,6 @@ uint8_t timert(int x)
 
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
-<<<<<<< HEAD
-	static uint8_t tel = 0;
-	tel ++;
-	timert(tel+1);
-	if (tel==10){
-		tel=0;
-	}
-
-}
-=======
     timert(1);
 }
->>>>>>> f28c583c5f0e012ff938f6e71a2b58f64b0dae7a
+
