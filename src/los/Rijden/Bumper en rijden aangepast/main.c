@@ -22,7 +22,6 @@
 
 // Declarations of functions
 int timer_counter(uint64_t inc);
-void cycleDelay(volatile unsigned long cd);
 void init();
 void goLinks();
 void goRechts();
@@ -33,6 +32,9 @@ int  BumperStatusLinks();
 int BumperStatusRechts();
 void init_usart();
 int leescommand();
+void rijden();
+
+int snelheid;
 
 
 
@@ -42,25 +44,13 @@ int main (void){
 	init();
 	init_usart();
 	sei();
+	
+	
 	while(1)
 	{
-
-		if(leescommand() == 49) // Als de invoer gelijk is aan 1
-		{
-			PORTC &= (1 << PINC2);   //Defined of hij achteruit gaat
-			PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-			OCR1A = 0x50;//dit zet de motoren aan
-			OCR1B  = 0x50;
-		}
-		if (leescommand() == 50) // Als de invoer gelijk is aan 2
-		{
-			PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
-			PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-			OCR1A = 0x50;//dit zet de motoren aan
-			OCR1B  = 0x50;
-		}
-		
+		rijden();
 	}
+return 0;
 }
 
 
@@ -81,6 +71,60 @@ int leescommand(){
 	return getal;
 }
 
+void rijden(){
+	uint8_t command = leescommand();
+	if (command == '1')
+	{
+		snelheid = 50;
+	}
+	if (command == '2')
+	{
+		snelheid = 125;
+	}
+	if (command == '3')
+	{
+		snelheid = 150;
+	}
+	
+	
+	if(command == 'w') // ga VOORUIT als invoer w is
+	{
+		PORTC &= (1 << PINC2);
+		PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
+	}
+	
+	if (command == 'a') // ga LINKSAF als invoer a is
+	{
+		PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
+		PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
+	}
+	if (command == 's') // ga ACHTERUIT als invoer s is
+	{
+		PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
+		PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
+	}
+	
+	if (command == 'd') // ga RECHTSAF als invoer d is
+	{
+		PORTC &= ~(1 << PINC2);   //Defined dat hij achteruit gaat
+		PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+		OCR1A = 0x50;//dit zet de motoren aan
+		OCR1B  = 0x50;
+	}
+	if (command == 'q') // q for quit
+	{
+		OCR1B = 0x00; // Uitzetten van de motoren
+		OCR1A = 0x00;
+	}
+}
+
+
 int timer_counter(uint64_t inc) {
 	static uint64_t i = 1;
 	if (inc)
@@ -88,13 +132,9 @@ int timer_counter(uint64_t inc) {
 	return i;
 }
 
-void cycleDelay(volatile unsigned long cd){
-	while(cd--);
-}
 
 void init()
 {
-	
 	sei();
 	TCNT1 = 0x00;
 	TCCR0 |= (1 << CS00)|(1 << CS01);
@@ -117,75 +157,3 @@ ISR(TIMER1_COMPB_vect)
 {
 timer_counter(1);
 }
-
-
-int BumperStatusLinks()
-{
-	int DDRBNu = DDRB;
-	int PORTBNu= PORTB;
-	DDRB &= (1 << PINB0);
-	PORTB &= (1 << PINB0);
-	
-    cycleDelay(10);
-    asm("nop");
-	int BumperTriggerLinks = PINB & (1 << PINB0);
-
-	DDRB = DDRBNu;
-	PORTB = PORTBNu;
-	
-	if (BumperTriggerLinks)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-int BumperStatusRechts()
-{
-	int DDRCNu = DDRC;
-	int PORTCNu = PORTC;
-	DDRC &= ~(1 << PINC6);
-	PORTC &= ~(1 << PINC6);
-	cycleDelay(10);
-	asm("nop");
-    
-	int BumperTriggerRechts = PINC & (1 << PINC6);
-
-	DDRC = DDRCNu;
-	PORTC = PORTCNu;
-	if (BumperTriggerRechts)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-void writeChar(char a)
-{
-	while (!(UCSRA & (1 << UDRE)));
-	UDR = (uint8_t) a;
-}
-
-void writeString(char * string)
-{
-	while ( * string)
-	writeChar( * string++);
-}
-
-int bumpers (void)
-{
-		while (1)
-	{
-		cycleDelay(100);
-		if (BumperStatusLinks())
-		{
-				writeString("Linker  bumper getriggerd. Ga achteruit!\n");
-		}
-		else if (BumperStatusRechts())
-		{
-		    	writeString("Rechter\n");
-		}
-	}
-	return 0;
-}
-
