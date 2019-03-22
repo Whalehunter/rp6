@@ -47,7 +47,7 @@ int main(void) {
 
     /* Init timer1 - PWM */
     TCCR1A = (0 << WGM10) | (1 << WGM11) | (1 << COM1A1) | (1 << COM1B1);
-    TCCR1B =  (1 << WGM13) | (0 << WGM12) | (1 << CS10);
+    TCCR1B = (1 << WGM13) | (0 << WGM12) | (1 << CS10);
     ICR1 = 210;
     OCR1AL = 0;
     OCR1BL = 0;

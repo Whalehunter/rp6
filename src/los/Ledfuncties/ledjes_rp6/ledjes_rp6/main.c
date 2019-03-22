@@ -33,7 +33,7 @@ int main(void)
     // Instellen van Timer compare registers
     TIMSK = (1<<OCIE0); // Timer overflow interrupt bitje
     TCCR0 = (1<<COM00) | (1<<WGM01); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
-    TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
+    TCCR0 |= (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
     OCR0 = 77; // OUtput compare ingesteld op 77 (80000/1024)
     knipper_licht_uit();
 
@@ -75,7 +75,6 @@ void knipper_licht_uit() {
     /* Rechts uit */
     PORTC &= ~(1<<PINC4);
 }
-
 
 uint8_t timert(int x)
 {
