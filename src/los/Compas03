@@ -17,7 +17,6 @@ const char *richting[] = {
 int main(void)
 {	
 	int fd;														// File descrition
-	// For older raspberry pi modules use "/dev/i2c-0" instead of "/dev/i2c-1" for the i2c port
 	char *fileName = "/dev/i2c-1";								// Name of the port we will be using
 	int  address = 0x60;										// Address of CMPS03 shifted right one bit
 	unsigned char buf[10];										// Buffer for data being read/ written on the i2c bus
