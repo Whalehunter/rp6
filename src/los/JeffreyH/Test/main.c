@@ -82,21 +82,29 @@ int leescommand(){
 void vooruit(){
 	PORTC &= (1 << PINC2);
 	PORTC &= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+	OCR1A = 0x50;//dit zet de motoren aan
+	OCR1B  = 0x50;
 }
 
 void links(){
 	PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
 	PORTC &= ~(1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+	OCR1A = 0x50;//dit zet de motoren aan
+	OCR1B  = 0x50;
 }
 
 void rechts(){
 	PORTC &= ~(1 << PINC2);   //Defined dat hij achteruit gaat
 	PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+	OCR1A = 0x50;//dit zet de motoren aan
+	OCR1B  = 0x50;
 }
 
 void achteruit(){
 	PORTC |= (1 << PINC2);   //Defined dat hij achteruit gaat
 	PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
+	OCR1A = 0x50;//dit zet de motoren aan
+	OCR1B  = 0x50;
 }
 
 

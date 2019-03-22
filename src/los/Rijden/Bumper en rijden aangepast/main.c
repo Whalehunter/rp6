@@ -23,13 +23,6 @@
 // Declarations of functions
 int timer_counter(uint64_t inc);
 void init();
-void goLinks();
-void goRechts();
-void goAchteruit();
-void goVooruit();
-int bumpers();
-int  BumperStatusLinks();
-int BumperStatusRechts();
 void init_usart();
 int leescommand();
 void rijden();
@@ -69,34 +62,25 @@ int leescommand(){
 	getal = UDR;
 	return getal;
 }
-
-/*
-int leessnelheid(){
-	int snelheid;
-	while(~UCSRA & (1<<RXC));
-	snelheid = UDR;
-	return snelheid;
-*/	
+	
 
 void rijden(){
 	uint8_t command = leescommand();
 	//uint8_t commands = leessnelheid();
-	static int laatste_snelheid;
-	 int snelheid = laatste_snelheid;
+	static int snelheid = 100;
 	
 	
 	if (command == '1')
 	{
-	//	commands = 50;
-		laatste_snelheid = 50;
+		snelheid = 50;
 	}
 	if (command == '2')
 	{
-		laatste_snelheid = 125;
+		snelheid = 125;
 	}
 	if (command == '3')
 	{
-		laatste_snelheid = 150;
+		snelheid = 150;
 	}
 	
 	
@@ -127,8 +111,8 @@ void rijden(){
 	{
 		PORTC &= ~(1 << PINC2);   //Defined dat hij achteruit gaat
 		PORTC |= (1 << PINC3);  // |= is achteruit op beide, &= is vooruit
-		OCR1A = 0x50;//dit zet de motoren aan
-		OCR1B  = 0x50;
+		OCR1A = snelheid;//dit zet de motoren aan
+		OCR1B  = snelheid;
 	}
 	if (command == 'q') // q for quit
 	{
