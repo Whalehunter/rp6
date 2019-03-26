@@ -67,23 +67,8 @@ int leescommand(){
 void rijden(){
 	uint8_t command = leescommand();
 	//uint8_t commands = leessnelheid();
-	static int snelheid = 100;
-	
-	
-	if (command == '1')
-	{
-		snelheid = 50;
-	}
-	if (command == '2')
-	{
-		snelheid = 125;
-	}
-	if (command == '3')
-	{
-		snelheid = 150;
-	}
-	
-	
+	static int snelheid = 0x50;
+
 	if(command == 'w') // ga VOORUIT als invoer w is
 	{
 		PORTC &= (1 << PINC2);

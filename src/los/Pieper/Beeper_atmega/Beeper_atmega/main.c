@@ -38,13 +38,12 @@ void init_pieper(){
 	//Instellen van de timer voor de frequentie/toonhoogte:
 	TIMSK2 = (1<<TOIE2); // Timer overflow interrupt bitje
 	TIFR2 = (1<<OCF2A);
-	TCCR2A |= (1<<COM2A1) | (1<<WGM21); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
+	TCCR2A |= (1<<COM2A1) | (1<<COM2A0); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
 	TCCR2A |= (1<<CS22) | (1<<CS21) | (1<<CS20); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
 	OCR2A = 15; // OUtput compare ingesteld op 77 (80000/1024)
 }
 
 uint8_t timert2(int x)
-
 {
 	static uint8_t delay = 0;
 
@@ -59,7 +58,7 @@ uint8_t timert2(int x)
 
 ISR(TIMER2_COMPA_vect) // Interrupt Service Routine
 {
-	timert2(1);
+	//timert2(1);
 	frequentie();
 }
 

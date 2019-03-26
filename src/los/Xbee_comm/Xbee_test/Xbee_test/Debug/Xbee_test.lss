@@ -167,7 +167,7 @@ Disassembly of section .text:
 }
 
 void init_hardware(){
-	DDRB = 0b00001111; // Portb Pinb 50/51/52/53 set on output (leds)
+	DDRB = 0x10; // Portb Pinb 50/51/52/53 set on output (leds)
   fa:	10 92 c0 00 	sts	0x00C0, r1	; 0x8000c0 <__TEXT_REGION_LENGTH__+0x7000c0>
   fe:	80 e1       	ldi	r24, 0x10	; 16
  100:	80 93 c1 00 	sts	0x00C1, r24	; 0x8000c1 <__TEXT_REGION_LENGTH__+0x7000c1>
@@ -208,8 +208,8 @@ int main(void)
 }
 
 void init_hardware(){
-	DDRB = 0b00001111; // Portb Pinb 50/51/52/53 set on output (leds)
- 12a:	8f e0       	ldi	r24, 0x0F	; 15
+	DDRB = 0x10; // Portb Pinb 50/51/52/53 set on output (leds)
+ 12a:	80 e1       	ldi	r24, 0x10	; 16
  12c:	84 b9       	out	0x04, r24	; 4
 		}
 		if (command == 83 || command == 115){	// Wanneer invoer gelijk is aan ASCII S of s
@@ -226,7 +226,7 @@ void init_hardware(){
 			PORTB ^= (1<<PINB2);				// Zet de onderste led aan
  130:	14 e0       	ldi	r17, 0x04	; 4
 		command = leescommand();
-		if (command==69 || command==101){ // als de invoer gelijk is aan E of e
+		if (command==119 || command==87){ // als de invoer gelijk is aan E of e
 			PORTB ^= (1<<PINB0);			// Zet de bovenste led aan
 		}
 		if (command==68 || command==100 ){	// Wanneer invoer gelijk is aan ASCII d of D
@@ -240,9 +240,9 @@ void init_hardware(){
 		command = leescommand();
  134:	c1 e0       	ldi	r28, 0x01	; 1
  136:	ef df       	rcall	.-34     	; 0x116 <leescommand>
-		if (command==69 || command==101){ // als de invoer gelijk is aan E of e
+		if (command==119 || command==87){ // als de invoer gelijk is aan E of e
  138:	8f 7d       	andi	r24, 0xDF	; 223
- 13a:	85 34       	cpi	r24, 0x45	; 69
+ 13a:	87 35       	cpi	r24, 0x57	; 87
  13c:	91 05       	cpc	r25, r1
  13e:	21 f4       	brne	.+8      	; 0x148 <main+0x20>
 			PORTB ^= (1<<PINB0);			// Zet de bovenste led aan
