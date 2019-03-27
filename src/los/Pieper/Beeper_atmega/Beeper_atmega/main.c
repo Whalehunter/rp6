@@ -16,13 +16,13 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-void init_pieper();
+void pieper_aan();
 void pieper_uit();
 
 int main(void)
 {
 	sei();
-	init_pieper();
+	pieper_aan();
 	
 	while (1)
 	{
@@ -30,7 +30,7 @@ int main(void)
 	}
 }
 
-void init_pieper(){
+void pieper_aan(){
 	DDRB = 0xFF; // PORTB op output instellen, PB4 (pin10) is een OCRA pin
 	
 	//Instellen van de timer2 voor de frequentie/toonhoogte:
