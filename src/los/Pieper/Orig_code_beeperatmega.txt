@@ -22,6 +22,7 @@ void frequentie();
 
 int main(void)
 {
+	
 	sei();
 	init_pieper();
 	
@@ -37,16 +38,16 @@ void init_pieper(){
 	//Instellen van de timer2 voor de frequentie/toonhoogte:
 	TCCR2A = (1<<COM2A0)| (1<<WGM21); //set oc2a on compare match | WGM on ctc mode
 	TCCR2B = (1<<CS22) | (1<<CS21) | (1<<CS20); // Stelt de prescaler in op 1024. Dan moet de OCA op 15.
-	OCR2A = 8; // OUtput compare ingesteld op
+	OCR2A = 15; // OUtput compare ingesteld op
 	
 	// Instellen van de 16bit timer3
-	TCCR3A = (1<<COM3A1) | (1<<COM3A0) ;
-	TCCR3B = (1<<CS32) | (1<<WGM32); // Prescaler op 256
-	OCR3A = 31250; // Output compare on 31250 (500ms)
-	TIMSK3 = (1<<OCIE3A);
+	TCCR3B = (1<<CS32); // Prescaler op 256
+	TIMSK3 = (1<<TOIE3);
+	TCNT3 = 31250;
+	
 }
 
-ISR(TIMER3_COMPA_vect){
+ISR(TIMER3_OVF_vect){
 		static bool aan = true;
 		static bool temp = true;
 	
@@ -59,4 +60,5 @@ ISR(TIMER3_COMPA_vect){
 		aan=!aan;
 	}
 	temp=!temp;
+	TCNT3 = 31250;
 }
