@@ -4,6 +4,7 @@
 #include <avr/interrupt.h>
 
 #define SLA 56
+#define DELAYWAARDE 20
 
 // Declarations of functions
 void i2c_slave_init();
@@ -12,6 +13,11 @@ void init_usart();
 // int leescommand();
 void rijden(char x);
 //int leessnelheid();
+uint8_t timert(int x);
+void init_leds();
+void toggle_links();
+void toggle_rechts();
+void knipper_licht_uit();
 
 char x,y;
 
@@ -77,20 +83,24 @@ void rijden (char x) {
 		TWDR = '^';
         PORTC &= ~(1 << PINC2);
         PORTC &= ~(1 << PINC3);
+		knipper_licht_uit();
         break;
     case 'a':
         PORTC |= (1 << PINC2);
         PORTC &= ~(1 << PINC3);
+		toggle_links();
 		TWDR = '<';
         break;
     case 's':
         PORTC |= (1 << PINC2);
         PORTC |= (1 << PINC3);
+		knipper_licht_uit();
 		TWDR = '.';
         break;
     case 'd':
         PORTC &= ~(1 << PINC2);
         PORTC |= (1 << PINC3);
+		toggle_rechts();
 		TWDR = '>';
         break;
     case '1':
@@ -130,3 +140,52 @@ void init()
 /*ISR(USART_RXC_vect) {
     rijden(UDR);
 }*/
+
+void init_leds(){
+	DDRB |= 0b10000000; // Stel pb7 in als output
+	DDRC |= 0b00010000; // Stel pc4 in als output
+	TIMSK = (1<<OCIE0); // Timer overflow interrupt bitje
+	TCCR0 |= (1<<COM00) | (1<<WGM01); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
+	TCCR0 |= (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
+	OCR0 = 77; // OUtput compare ingesteld op 77 (80000/1024)
+}
+
+void toggle_links(){
+	if (timert(0)){
+		PORTB ^= (1<<PINB7);
+	}
+}
+
+void toggle_rechts(){
+	if (timert(0)){
+		PORTC ^= (1<<PINC4);
+	}
+}
+
+
+void knipper_licht_uit() {
+	/* Links uit */
+	PORTB &= ~(1<<PINB7);
+	/* Rechts uit */
+	PORTC &= ~(1<<PINC4);
+}
+
+
+uint8_t timert(int x)
+{
+	static uint8_t delay = 0;
+
+	if (x) {
+		delay++;
+		} else if (delay >= DELAYWAARDE) {
+		delay = 0;
+		return 1;
+	}
+
+	return 0;
+}
+
+ISR(TIMER0_COMP_vect) // Interrupt Service Routine
+{
+	timert(1);
+}
