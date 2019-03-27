@@ -18,6 +18,7 @@ void init_leds();
 void toggle_links();
 void toggle_rechts();
 int stuurt(int update); // 1 = links, 2 = rechts, 3 = 0 = rechtdoor of achteruit
+void leds();
 
 char x,y;
 
@@ -153,6 +154,7 @@ void init_leds(){
 void toggle_links(){
 	if (stuurt(0) == 1 && timert(0)){
 		PORTB ^= (1<<PINB7);
+		PORTC &= ~(1<<PINC4);
 	} else if(stuurt(0) == 0) {
 		PORTB &= ~(1<<PINB7);
 	}
@@ -161,9 +163,14 @@ void toggle_links(){
 void toggle_rechts(){
 	if (stuurt(0) == 2 && timert(0)){
 		PORTC ^= (1<<PINC4);
+		PORTB &= ~(1<<PINB7);
 	} else if (stuurt(0) == 0){
 		PORTC &= ~(1<<PINC4);
 	}
+}
+
+void leds(){
+	
 }
 
 
