@@ -17,8 +17,7 @@
 #include <util/delay.h>
 
 void init_pieper();
-uint8_t timert2(int x);
-void frequentie();
+void pieper_uit();
 
 int main(void)
 {
@@ -44,6 +43,11 @@ void init_pieper(){
 	TCCR3B = (1<<CS32) | (1<<WGM32); // Prescaler op 256
 	OCR3A = 31250; // Output compare on 31250 (500ms)
 	TIMSK3 = (1<<OCIE3A);
+}
+
+void pieper_uit(){
+	TCCR2B = (1<<CS00); // uitzetten prescalers en dus timers
+	TCCR3B= (1<<CS00);
 }
 
 ISR(TIMER3_COMPA_vect){

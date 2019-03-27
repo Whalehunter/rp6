@@ -11,21 +11,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000260  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000030  00000000  00000000  000002a0  2**0
+  4 .debug_aranges 00000038  00000000  00000000  000002a0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000cbd  00000000  00000000  000002d0  2**0
+  5 .debug_info   00000cd2  00000000  00000000  000002d8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000bcb  00000000  00000000  00000f8d  2**0
+  6 .debug_abbrev 00000bcb  00000000  00000000  00000faa  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000338  00000000  00000000  00001b58  2**0
+  7 .debug_line   00000354  00000000  00000000  00001b75  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000058  00000000  00000000  00001e90  2**2
+  8 .debug_frame  00000068  00000000  00000000  00001ecc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000566  00000000  00000000  00001ee8  2**0
+  9 .debug_str    00000571  00000000  00000000  00001f34  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000049  00000000  00000000  0000244e  2**0
+ 10 .debug_loc    00000049  00000000  00000000  000024a5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000020  00000000  00000000  00002497  2**0
+ 11 .debug_ranges 00000028  00000000  00000000  000024ee  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -177,59 +177,38 @@ Disassembly of section .text:
  112:	76 cf       	rjmp	.-276    	; 0x0 <__vectors>
 
 00000114 <init_pieper>:
-		
-	}
+	TIMSK3 = (1<<OCIE3A);
 }
 
-void init_pieper(){
-	DDRB = 0xFF; // PORTB op output instellen, PB4 (pin10) is een OCRA pin
+void pieper_uit(){
+	TCCR2B = (1<<CS00); // uitzetten prescalers en dus timers
+	TCCR3B= (1<<CS00);
  114:	8f ef       	ldi	r24, 0xFF	; 255
  116:	84 b9       	out	0x04, r24	; 4
-	
-	//Instellen van de timer2 voor de frequentie/toonhoogte:
-	TCCR2A = (1<<COM2A0)| (1<<WGM21); //set oc2a on compare match | WGM on ctc mode
  118:	82 e4       	ldi	r24, 0x42	; 66
  11a:	80 93 b0 00 	sts	0x00B0, r24	; 0x8000b0 <__TEXT_REGION_LENGTH__+0x7000b0>
-	TCCR2B = (1<<CS22) | (1<<CS21) | (1<<CS20); // Stelt de prescaler in op 1024. Dan moet de OCA op 15.
  11e:	87 e0       	ldi	r24, 0x07	; 7
  120:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <__TEXT_REGION_LENGTH__+0x7000b1>
-	OCR2A = 8; // OUtput compare ingesteld op
  124:	88 e0       	ldi	r24, 0x08	; 8
  126:	80 93 b3 00 	sts	0x00B3, r24	; 0x8000b3 <__TEXT_REGION_LENGTH__+0x7000b3>
-	
-	// Instellen van de 16bit timer3
-	TCCR3A = (1<<COM3A1) | (1<<COM3A0) ;
  12a:	80 ec       	ldi	r24, 0xC0	; 192
  12c:	80 93 90 00 	sts	0x0090, r24	; 0x800090 <__TEXT_REGION_LENGTH__+0x700090>
-	TCCR3B = (1<<CS32) | (1<<WGM32); // Prescaler op 256
  130:	8c e0       	ldi	r24, 0x0C	; 12
  132:	80 93 91 00 	sts	0x0091, r24	; 0x800091 <__TEXT_REGION_LENGTH__+0x700091>
-	OCR3A = 31250; // Output compare on 31250 (500ms)
  136:	82 e1       	ldi	r24, 0x12	; 18
  138:	9a e7       	ldi	r25, 0x7A	; 122
  13a:	90 93 99 00 	sts	0x0099, r25	; 0x800099 <__TEXT_REGION_LENGTH__+0x700099>
  13e:	80 93 98 00 	sts	0x0098, r24	; 0x800098 <__TEXT_REGION_LENGTH__+0x700098>
-	TIMSK3 = (1<<OCIE3A);
  142:	82 e0       	ldi	r24, 0x02	; 2
  144:	80 93 71 00 	sts	0x0071, r24	; 0x800071 <__TEXT_REGION_LENGTH__+0x700071>
  148:	08 95       	ret
 
 0000014a <main>:
-void frequentie();
-
-int main(void)
-{
-	
-	sei();
  14a:	78 94       	sei
-	init_pieper();
  14c:	e3 df       	rcall	.-58     	; 0x114 <init_pieper>
  14e:	ff cf       	rjmp	.-2      	; 0x14e <main+0x4>
 
 00000150 <__vector_32>:
-	TCCR3B = (1<<CS32) | (1<<WGM32); // Prescaler op 256
-	OCR3A = 31250; // Output compare on 31250 (500ms)
-	TIMSK3 = (1<<OCIE3A);
 }
 
 ISR(TIMER3_COMPA_vect){
