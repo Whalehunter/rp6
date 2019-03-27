@@ -26,6 +26,7 @@
   #define SL6 (1<<PINB0) // Red Left Led3
 */
 uint8_t timert(int x);
+void init_leds();
 void toggle_links();
 void toggle_rechts();
 void knipper_licht_uit();
@@ -35,14 +36,7 @@ void knipper_licht_uit();
 int main(void)
 {
     sei();
-    DDRB = 0b10000000; // Stel pb7 in als output
-    DDRC = 0b00010000; // Stel pc4 in als output
-
-    // Instellen van Timer compare registers
-    TIMSK = (1<<OCIE0); // Timer overflow interrupt bitje
-    TCCR0 = (1<<COM00) | (1<<WGM01); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
-    TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
-    OCR0 = 77; // OUtput compare ingesteld op 77 (80000/1024)
+    init_leds();
     knipper_licht_uit();
 
     while (1) {
@@ -50,6 +44,15 @@ int main(void)
         toggle_rechts();
     }
     return 0;
+}
+
+void init_leds(){
+	DDRB = 0b10000000; // Stel pb7 in als output
+	DDRC = 0b00010000; // Stel pc4 in als output
+	TIMSK = (1<<OCIE0); // Timer overflow interrupt bitje
+	TCCR0 = (1<<COM00) | (1<<WGM01); // Timer control register COM00 - toggle oc0a on compare match | WGM on ctc mode
+	TCCR0 = (1<<CS02) | (1<<CS00); // Stelt de prescaler in op 1024. Dan moet de OCA op 77.
+	OCR0 = 77; // OUtput compare ingesteld op 77 (80000/1024)
 }
 
 void toggle_links(){

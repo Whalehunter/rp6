@@ -21,11 +21,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   8 .debug_frame  00000068  00000000  00000000  00001ecc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000571  00000000  00000000  00001f34  2**0
+  9 .debug_str    00000570  00000000  00000000  00001f34  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000049  00000000  00000000  000024a5  2**0
+ 10 .debug_loc    00000049  00000000  00000000  000024a4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000028  00000000  00000000  000024ee  2**0
+ 11 .debug_ranges 00000028  00000000  00000000  000024ed  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -176,7 +176,7 @@ Disassembly of section .text:
 00000112 <__bad_interrupt>:
  112:	76 cf       	rjmp	.-276    	; 0x0 <__vectors>
 
-00000114 <init_pieper>:
+00000114 <pieper_aan>:
 	TIMSK3 = (1<<OCIE3A);
 }
 
@@ -205,7 +205,7 @@ void pieper_uit(){
 
 0000014a <main>:
  14a:	78 94       	sei
- 14c:	e3 df       	rcall	.-58     	; 0x114 <init_pieper>
+ 14c:	e3 df       	rcall	.-58     	; 0x114 <pieper_aan>
  14e:	ff cf       	rjmp	.-2      	; 0x14e <main+0x4>
 
 00000150 <__vector_32>:
