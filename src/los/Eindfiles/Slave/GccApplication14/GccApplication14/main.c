@@ -17,25 +17,25 @@ uint8_t timert(int x);
 void init_leds();
 void toggle_links();
 void toggle_rechts();
-void knipper_licht_uit();
+int stuurt(int update); // 1 = links, 2 = rechts, 3 = 0 = rechtdoor of achteruit
 
 char x,y;
-
-
 
 int main (void){
     // Initialisers
     cli();
     init();
+	init_leds();
     //init_usart();
     sei();
 	i2c_slave_init();
-
 
     while(1)
         {
 			     //   OCR1A = 50;
 			       // OCR1B = 50;
+				   toggle_rechts();
+				   toggle_links();
         }
     return 0;
 }
@@ -83,24 +83,24 @@ void rijden (char x) {
 		TWDR = '^';
         PORTC &= ~(1 << PINC2);
         PORTC &= ~(1 << PINC3);
-		knipper_licht_uit();
+		stuurt(3);
         break;
     case 'a':
         PORTC |= (1 << PINC2);
         PORTC &= ~(1 << PINC3);
-		toggle_links();
+		stuurt(1);
 		TWDR = '<';
         break;
     case 's':
         PORTC |= (1 << PINC2);
         PORTC |= (1 << PINC3);
-		knipper_licht_uit();
 		TWDR = '.';
+		stuurt(3);
         break;
     case 'd':
         PORTC &= ~(1 << PINC2);
         PORTC |= (1 << PINC3);
-		toggle_rechts();
+		stuurt(2);
 		TWDR = '>';
         break;
     case '1':
@@ -151,23 +151,19 @@ void init_leds(){
 }
 
 void toggle_links(){
-	if (timert(0)){
+	if (stuurt(0) == 1 && timert(0)){
 		PORTB ^= (1<<PINB7);
+	} else if(stuurt(0) == 0) {
+		PORTB &= ~(1<<PINB7);
 	}
 }
 
 void toggle_rechts(){
-	if (timert(0)){
+	if (stuurt(0) == 2 && timert(0)){
 		PORTC ^= (1<<PINC4);
+	} else if (stuurt(0) == 0){
+		PORTC &= ~(1<<PINC4);
 	}
-}
-
-
-void knipper_licht_uit() {
-	/* Links uit */
-	PORTB &= ~(1<<PINB7);
-	/* Rechts uit */
-	PORTC &= ~(1<<PINC4);
 }
 
 
@@ -183,6 +179,21 @@ uint8_t timert(int x)
 	}
 
 	return 0;
+}
+
+int stuurt (int update) {
+	static int richting = 0;
+	
+	if (update) {
+		if (update == 3)
+			richting = 0;
+		else
+			richting = update;
+
+		return 0;
+	}
+	
+	return richting;
 }
 
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
