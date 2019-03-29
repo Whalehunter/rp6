@@ -19,6 +19,8 @@ void toggle_links();
 void toggle_rechts();
 int stuurt(int update); // 1 = links, 2 = rechts, 3 = 0 = rechtdoor of achteruit
 void leds();
+int BumperStatusLinks();
+int BumperStatusRechts();
 
 char x,y;
 
@@ -37,6 +39,8 @@ int main (void){
 			       // OCR1B = 50;
 				   toggle_rechts();
 				   toggle_links();
+				   BumperStatusRechts();
+				   BumperStatusLinks();
         }
     return 0;
 }
@@ -206,4 +210,52 @@ int stuurt (int update) {
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
 	timert(1);
+}
+
+
+int BumperStatusLinks()
+{
+
+	int DDRBcurrent = DDRB;
+	int PORTBcurrent = PORTB;
+	DDRB &= ~(1 << PINB0);
+
+	PORTB &= ~(1 << PINB0);
+	asm("nop");
+
+
+	int BumperTriggerLinks = PINB & (1 << PINB0);
+
+	DDRB = DDRBcurrent;
+	PORTB = PORTBcurrent;
+	
+	if (BumperTriggerLinks)
+	{
+		PORTC |= (1 << PINC2);
+		PORTC |= (1 << PINC3);
+		return 1;
+	}
+	return 0;
+}
+
+int BumperStatusRechts()
+{
+
+	int DDRCcurrent = DDRC;
+	int PORTCcurrent = PORTC;
+	DDRC &= ~(1 << PINC6);
+	PORTC &= ~(1 << PINC6);
+	asm("nop");
+
+	int BumperTriggerRechts = PINC & (1 << PINC6);
+
+	DDRC = DDRCcurrent;
+	PORTC = PORTCcurrent;
+	if (BumperTriggerRechts)
+	{
+		PORTC |= (1 << PINC2);
+		PORTC |= (1 << PINC3);
+		return 1;
+	}
+	return 0;
 }

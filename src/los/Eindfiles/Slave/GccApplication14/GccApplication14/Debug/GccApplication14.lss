@@ -3,31 +3,31 @@ GccApplication14.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         0000037c  00000000  00000000  00000074  2**1
+  0 .text         000003cc  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000003f0  2**0
+  1 .data         00000000  00800060  00800060  00000440  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .bss          00000005  00800060  00800060  000003f0  2**0
+  2 .bss          00000005  00800060  00800060  00000440  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000003f0  2**0
+  3 .comment      00000030  00000000  00000000  00000440  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000420  2**2
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000470  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000080  00000000  00000000  0000045c  2**0
+  5 .debug_aranges 00000090  00000000  00000000  000004ac  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000008d4  00000000  00000000  000004dc  2**0
+  6 .debug_info   00000988  00000000  00000000  0000053c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000646  00000000  00000000  00000db0  2**0
+  7 .debug_abbrev 0000066f  00000000  00000000  00000ec4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000004e9  00000000  00000000  000013f6  2**0
+  8 .debug_line   000005c1  00000000  00000000  00001533  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000174  00000000  00000000  000018e0  2**2
+  9 .debug_frame  00000194  00000000  00000000  00001af4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    0000037c  00000000  00000000  00001a54  2**0
+ 10 .debug_str    000003fa  00000000  00000000  00001c88  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000385  00000000  00000000  00001dd0  2**0
+ 11 .debug_loc    000003df  00000000  00000000  00002082  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000070  00000000  00000000  00002155  2**0
+ 12 .debug_ranges 00000080  00000000  00000000  00002461  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -43,7 +43,7 @@ Disassembly of section .text:
   1c:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
   20:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
   24:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
-  28:	0c 94 90 01 	jmp	0x320	; 0x320 <__vector_10>
+  28:	0c 94 83 01 	jmp	0x306	; 0x306 <__vector_10>
   2c:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
   30:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
   34:	0c 94 83 00 	jmp	0x106	; 0x106 <__bad_interrupt>
@@ -147,8 +147,8 @@ Disassembly of section .text:
   f8:	a5 36       	cpi	r26, 0x65	; 101
   fa:	b2 07       	cpc	r27, r18
   fc:	e1 f7       	brne	.-8      	; 0xf6 <.do_clear_bss_loop>
-  fe:	0e 94 83 01 	call	0x306	; 0x306 <main>
- 102:	0c 94 bc 01 	jmp	0x378	; 0x378 <_exit>
+  fe:	0e 94 cd 01 	call	0x39a	; 0x39a <main>
+ 102:	0c 94 e4 01 	jmp	0x3c8	; 0x3c8 <_exit>
 
 00000106 <__bad_interrupt>:
  106:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -177,7 +177,7 @@ Disassembly of section .text:
  122:	4b c0       	rjmp	.+150    	; 0x1ba <rijden+0xa4>
  124:	e6 5d       	subi	r30, 0xD6	; 214
  126:	ff 4f       	sbci	r31, 0xFF	; 255
- 128:	0c 94 b6 01 	jmp	0x36c	; 0x36c <__tablejump2__>
+ 128:	0c 94 de 01 	jmp	0x3bc	; 0x3bc <__tablejump2__>
  12c:	8e e5       	ldi	r24, 0x5E	; 94
  12e:	83 b9       	out	0x03, r24	; 3
  130:	aa 98       	cbi	0x15, 2	; 21
@@ -345,15 +345,15 @@ Disassembly of section .text:
 00000286 <timert>:
  286:	89 2b       	or	r24, r25
  288:	39 f0       	breq	.+14     	; 0x298 <timert+0x12>
- 28a:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <delay.1661>
+ 28a:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <delay.1663>
  28e:	8f 5f       	subi	r24, 0xFF	; 255
- 290:	80 93 62 00 	sts	0x0062, r24	; 0x800062 <delay.1661>
+ 290:	80 93 62 00 	sts	0x0062, r24	; 0x800062 <delay.1663>
  294:	80 e0       	ldi	r24, 0x00	; 0
  296:	08 95       	ret
- 298:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <delay.1661>
+ 298:	80 91 62 00 	lds	r24, 0x0062	; 0x800062 <delay.1663>
  29c:	84 31       	cpi	r24, 0x14	; 20
  29e:	20 f0       	brcs	.+8      	; 0x2a8 <timert+0x22>
- 2a0:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <delay.1661>
+ 2a0:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <delay.1663>
  2a4:	81 e0       	ldi	r24, 0x01	; 1
  2a6:	08 95       	ret
  2a8:	80 e0       	ldi	r24, 0x00	; 0
@@ -402,70 +402,181 @@ Disassembly of section .text:
  302:	ac 98       	cbi	0x15, 4	; 21
  304:	08 95       	ret
 
-00000306 <main>:
- 306:	f8 94       	cli
- 308:	0e 94 26 01 	call	0x24c	; 0x24c <init>
- 30c:	0e 94 36 01 	call	0x26c	; 0x26c <init_leds>
- 310:	78 94       	sei
- 312:	0e 94 85 00 	call	0x10a	; 0x10a <i2c_slave_init>
- 316:	0e 94 6c 01 	call	0x2d8	; 0x2d8 <toggle_rechts>
- 31a:	0e 94 56 01 	call	0x2ac	; 0x2ac <toggle_links>
- 31e:	fb cf       	rjmp	.-10     	; 0x316 <main+0x10>
-
-00000320 <__vector_10>:
+00000306 <__vector_10>:
 
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
- 320:	1f 92       	push	r1
- 322:	0f 92       	push	r0
- 324:	0f b6       	in	r0, 0x3f	; 63
- 326:	0f 92       	push	r0
- 328:	11 24       	eor	r1, r1
- 32a:	2f 93       	push	r18
- 32c:	3f 93       	push	r19
- 32e:	4f 93       	push	r20
- 330:	5f 93       	push	r21
- 332:	6f 93       	push	r22
- 334:	7f 93       	push	r23
- 336:	8f 93       	push	r24
- 338:	9f 93       	push	r25
- 33a:	af 93       	push	r26
- 33c:	bf 93       	push	r27
- 33e:	ef 93       	push	r30
- 340:	ff 93       	push	r31
+ 306:	1f 92       	push	r1
+ 308:	0f 92       	push	r0
+ 30a:	0f b6       	in	r0, 0x3f	; 63
+ 30c:	0f 92       	push	r0
+ 30e:	11 24       	eor	r1, r1
+ 310:	2f 93       	push	r18
+ 312:	3f 93       	push	r19
+ 314:	4f 93       	push	r20
+ 316:	5f 93       	push	r21
+ 318:	6f 93       	push	r22
+ 31a:	7f 93       	push	r23
+ 31c:	8f 93       	push	r24
+ 31e:	9f 93       	push	r25
+ 320:	af 93       	push	r26
+ 322:	bf 93       	push	r27
+ 324:	ef 93       	push	r30
+ 326:	ff 93       	push	r31
 	timert(1);
- 342:	81 e0       	ldi	r24, 0x01	; 1
- 344:	90 e0       	ldi	r25, 0x00	; 0
- 346:	0e 94 43 01 	call	0x286	; 0x286 <timert>
+ 328:	81 e0       	ldi	r24, 0x01	; 1
+ 32a:	90 e0       	ldi	r25, 0x00	; 0
+ 32c:	0e 94 43 01 	call	0x286	; 0x286 <timert>
 }
- 34a:	ff 91       	pop	r31
- 34c:	ef 91       	pop	r30
- 34e:	bf 91       	pop	r27
- 350:	af 91       	pop	r26
- 352:	9f 91       	pop	r25
- 354:	8f 91       	pop	r24
- 356:	7f 91       	pop	r23
- 358:	6f 91       	pop	r22
- 35a:	5f 91       	pop	r21
- 35c:	4f 91       	pop	r20
- 35e:	3f 91       	pop	r19
- 360:	2f 91       	pop	r18
- 362:	0f 90       	pop	r0
- 364:	0f be       	out	0x3f, r0	; 63
- 366:	0f 90       	pop	r0
- 368:	1f 90       	pop	r1
- 36a:	18 95       	reti
+ 330:	ff 91       	pop	r31
+ 332:	ef 91       	pop	r30
+ 334:	bf 91       	pop	r27
+ 336:	af 91       	pop	r26
+ 338:	9f 91       	pop	r25
+ 33a:	8f 91       	pop	r24
+ 33c:	7f 91       	pop	r23
+ 33e:	6f 91       	pop	r22
+ 340:	5f 91       	pop	r21
+ 342:	4f 91       	pop	r20
+ 344:	3f 91       	pop	r19
+ 346:	2f 91       	pop	r18
+ 348:	0f 90       	pop	r0
+ 34a:	0f be       	out	0x3f, r0	; 63
+ 34c:	0f 90       	pop	r0
+ 34e:	1f 90       	pop	r1
+ 350:	18 95       	reti
 
-0000036c <__tablejump2__>:
- 36c:	ee 0f       	add	r30, r30
- 36e:	ff 1f       	adc	r31, r31
- 370:	05 90       	lpm	r0, Z+
- 372:	f4 91       	lpm	r31, Z
- 374:	e0 2d       	mov	r30, r0
- 376:	09 94       	ijmp
+00000352 <BumperStatusLinks>:
 
-00000378 <_exit>:
- 378:	f8 94       	cli
 
-0000037a <__stop_program>:
- 37a:	ff cf       	rjmp	.-2      	; 0x37a <__stop_program>
+int BumperStatusLinks()
+{
+
+	int DDRBcurrent = DDRB;
+ 352:	27 b3       	in	r18, 0x17	; 23
+	int PORTBcurrent = PORTB;
+ 354:	98 b3       	in	r25, 0x18	; 24
+	DDRB &= ~(1 << PINB0);
+ 356:	b8 98       	cbi	0x17, 0	; 23
+
+	PORTB &= ~(1 << PINB0);
+ 358:	c0 98       	cbi	0x18, 0	; 24
+	asm("nop");
+ 35a:	00 00       	nop
+
+
+	int BumperTriggerLinks = PINB & (1 << PINB0);
+ 35c:	86 b3       	in	r24, 0x16	; 22
+
+	DDRB = DDRBcurrent;
+ 35e:	27 bb       	out	0x17, r18	; 23
+	PORTB = PORTBcurrent;
+ 360:	98 bb       	out	0x18, r25	; 24
+	
+	if (BumperTriggerLinks)
+ 362:	80 ff       	sbrs	r24, 0
+ 364:	05 c0       	rjmp	.+10     	; 0x370 <BumperStatusLinks+0x1e>
+	{
+		PORTC |= (1 << PINC2);
+ 366:	aa 9a       	sbi	0x15, 2	; 21
+		PORTC |= (1 << PINC3);
+ 368:	ab 9a       	sbi	0x15, 3	; 21
+		return 1;
+ 36a:	81 e0       	ldi	r24, 0x01	; 1
+ 36c:	90 e0       	ldi	r25, 0x00	; 0
+ 36e:	08 95       	ret
+	}
+	return 0;
+ 370:	80 e0       	ldi	r24, 0x00	; 0
+ 372:	90 e0       	ldi	r25, 0x00	; 0
+}
+ 374:	08 95       	ret
+
+00000376 <BumperStatusRechts>:
+
+int BumperStatusRechts()
+{
+
+	int DDRCcurrent = DDRC;
+ 376:	24 b3       	in	r18, 0x14	; 20
+	int PORTCcurrent = PORTC;
+ 378:	95 b3       	in	r25, 0x15	; 21
+	DDRC &= ~(1 << PINC6);
+ 37a:	a6 98       	cbi	0x14, 6	; 20
+	PORTC &= ~(1 << PINC6);
+ 37c:	ae 98       	cbi	0x15, 6	; 21
+	asm("nop");
+ 37e:	00 00       	nop
+
+	int BumperTriggerRechts = PINC & (1 << PINC6);
+ 380:	83 b3       	in	r24, 0x13	; 19
+
+	DDRC = DDRCcurrent;
+ 382:	24 bb       	out	0x14, r18	; 20
+	PORTC = PORTCcurrent;
+ 384:	95 bb       	out	0x15, r25	; 21
+	if (BumperTriggerRechts)
+ 386:	86 ff       	sbrs	r24, 6
+ 388:	05 c0       	rjmp	.+10     	; 0x394 <BumperStatusRechts+0x1e>
+	{
+		/* PORTC |= (1 << PINC2);
+		PORTC |= (1 << PINC3);*/
+		TWDR = 's';
+ 38a:	83 e7       	ldi	r24, 0x73	; 115
+ 38c:	83 b9       	out	0x03, r24	; 3
+		return 1;
+ 38e:	81 e0       	ldi	r24, 0x01	; 1
+ 390:	90 e0       	ldi	r25, 0x00	; 0
+ 392:	08 95       	ret
+	}
+	return 0;
+ 394:	80 e0       	ldi	r24, 0x00	; 0
+ 396:	90 e0       	ldi	r25, 0x00	; 0
+}
+ 398:	08 95       	ret
+
+0000039a <main>:
+
+char x,y;
+
+int main (void){
+    // Initialisers
+    cli();
+ 39a:	f8 94       	cli
+    init();
+ 39c:	0e 94 26 01 	call	0x24c	; 0x24c <init>
+	init_leds();
+ 3a0:	0e 94 36 01 	call	0x26c	; 0x26c <init_leds>
+    //init_usart();
+    sei();
+ 3a4:	78 94       	sei
+	i2c_slave_init();
+ 3a6:	0e 94 85 00 	call	0x10a	; 0x10a <i2c_slave_init>
+
+    while(1)
+        {
+			     //   OCR1A = 50;
+			       // OCR1B = 50;
+				   toggle_rechts();
+ 3aa:	0e 94 6c 01 	call	0x2d8	; 0x2d8 <toggle_rechts>
+				   toggle_links();
+ 3ae:	0e 94 56 01 	call	0x2ac	; 0x2ac <toggle_links>
+				   BumperStatusRechts();
+ 3b2:	0e 94 bb 01 	call	0x376	; 0x376 <BumperStatusRechts>
+				   BumperStatusLinks();
+ 3b6:	0e 94 a9 01 	call	0x352	; 0x352 <BumperStatusLinks>
+ 3ba:	f7 cf       	rjmp	.-18     	; 0x3aa <main+0x10>
+
+000003bc <__tablejump2__>:
+ 3bc:	ee 0f       	add	r30, r30
+ 3be:	ff 1f       	adc	r31, r31
+ 3c0:	05 90       	lpm	r0, Z+
+ 3c2:	f4 91       	lpm	r31, Z
+ 3c4:	e0 2d       	mov	r30, r0
+ 3c6:	09 94       	ijmp
+
+000003c8 <_exit>:
+ 3c8:	f8 94       	cli
+
+000003ca <__stop_program>:
+ 3ca:	ff cf       	rjmp	.-2      	; 0x3ca <__stop_program>
