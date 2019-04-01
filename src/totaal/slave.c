@@ -16,12 +16,14 @@ uint8_t timert(int x);
 void init_leds();
 void i2c_send(char data);
 void init_update_interval();
+void setDistance(uint16_t links, uint16_t rechts);
+void init_ENC_interrupt();
 
 /* If a setting needs updating in while loop *********************************/
 typedef struct {
         int speed;
         int dir;
-        int distance;
+        long int distance;
 } RP6_Update;
 
 /* Speed settings RP6 ********************************************************/
@@ -281,4 +283,50 @@ ISR(TIMER2_OVF_vect) {
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
         rp6.blinkerCount++;
+}
+
+
+void init_ENC_interrupt(){
+	PORTB |= (1<<PINB4);
+	DDRD &= ~((1<<PD2) | (1<<PD3)); // Instellen van PD2 en PD3
+	PORTD |= (1<<PD2) |(1<<PD3);
+	MCUCR |= (1<<ISC10) | (1<<ISC00);
+	GICR |= (1<<INT0) | (1<<INT1);  // Interrupt
+}
+
+
+void setDistance(uint16_t links, uint16_t rechts){
+	static long long int edges_links = 0;
+	static long long int edges_rechts = 0;
+
+	if (links != 0)
+	{
+		edges_links = links;
+	}
+	if (rechts != 0)
+	{
+		edges_rechts = rechts;
+	}
+	long long int avg_edges = (edges_links+edges_rechts)/2;
+	RP6_Update.distance = avg_edges * 0.025;
+	static long long int last_distance = 0;
+	if (last_distance != RP6_Update.distance){
+		i2c_send(RP6_Update.distance);
+		last_distance = RP6_Update.distance;
+	}
+
+}
+
+ISR(INT0_vect)
+{
+	static long long int edges_links = 0;
+	edges_links++;
+	setDistance(edges_links, 0);
+}
+
+ISR(INT1_vect)
+{
+	static long long int edges_rechts = 0;
+	edges_rechts++;
+	setDistance(0 , edges_rechts);
 }
