@@ -582,12 +582,12 @@ int main (void)
  41c:	aa 98       	cbi	0x15, 2	; 21
 	PORTC &= ~(1 << PINC3);
  41e:	ab 98       	cbi	0x15, 3	; 21
-	OCR1A = 125;
- 420:	8d e7       	ldi	r24, 0x7D	; 125
+	OCR1A = 50;
+ 420:	82 e3       	ldi	r24, 0x32	; 50
  422:	90 e0       	ldi	r25, 0x00	; 0
  424:	9b bd       	out	0x2b, r25	; 43
  426:	8a bd       	out	0x2a, r24	; 42
-	OCR1B = 125;
+	OCR1B = 50;
  428:	99 bd       	out	0x29, r25	; 41
  42a:	88 bd       	out	0x28, r24	; 40
  42c:	ff cf       	rjmp	.-2      	; 0x42c <main+0x1e>

@@ -34,14 +34,13 @@ int main (void)
 	sei();
 	PORTC &= ~(1 << PINC2);
 	PORTC &= ~(1 << PINC3);
-	OCR1A = 125;
-	OCR1B = 125;
+	OCR1A = 50;
+	OCR1B = 50;
 
 	while(1)
 	{
 		
 	}
-	
 	return 0;
 }
 

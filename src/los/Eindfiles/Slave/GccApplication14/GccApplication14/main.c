@@ -21,8 +21,11 @@ int stuurt(int update); // 1 = links, 2 = rechts, 3 = 0 = rechtdoor of achteruit
 void leds();
 int BumperStatusLinks();
 int BumperStatusRechts();
+void setDistance(uint16_t links, uint16_t rechts);
+void init_ENC_interrupt();
+void DriveSpecific();
 
-char x,y;
+char x,y, k;
 
 int main (void){
     // Initialisers
@@ -32,11 +35,10 @@ int main (void){
     //init_usart();
     sei();
 	i2c_slave_init();
+	init_ENC_interrupt();
 
     while(1)
         {
-			     //   OCR1A = 50;
-			       // OCR1B = 50;
 				   toggle_rechts();
 				   toggle_links();
 				   BumperStatusRechts();
@@ -173,11 +175,6 @@ void toggle_rechts(){
 	}
 }
 
-void leds(){
-	
-}
-
-
 uint8_t timert(int x)
 {
 	static uint8_t delay = 0;
@@ -188,13 +185,11 @@ uint8_t timert(int x)
 		delay = 0;
 		return 1;
 	}
-
 	return 0;
 }
 
 int stuurt (int update) {
 	static int richting = 0;
-	
 	if (update) {
 		if (update == 3)
 			richting = 0;
@@ -215,7 +210,6 @@ ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 
 int BumperStatusLinks()
 {
-
 	int DDRBcurrent = DDRB;
 	int PORTBcurrent = PORTB;
 	DDRB &= ~(1 << PINB0);
@@ -240,7 +234,6 @@ int BumperStatusLinks()
 
 int BumperStatusRechts()
 {
-
 	int DDRCcurrent = DDRC;
 	int PORTCcurrent = PORTC;
 	DDRC &= ~(1 << PINC6);
@@ -258,4 +251,53 @@ int BumperStatusRechts()
 		return 1;
 	}
 	return 0;
+}
+
+void init_ENC_interrupt(){
+	PORTB |= (1<<PINB4);
+	DDRD &= ~((1<<PD2) | (1<<PD3)); // Instellen van PD2 en PD3
+	PORTD |= (1<<PD2) |(1<<PD3);
+	MCUCR |= (1<<ISC10) | (1<<ISC00);
+	GICR |= (1<<INT0) | (1<<INT1);  // Interrupt
+}
+
+
+void setDistance(uint16_t links, uint16_t rechts){
+	static long long int edges_links = 0;
+	static long long int edges_rechts = 0;
+
+	if (links != 0)
+	{
+		edges_links = links;
+	}
+	if (rechts != 0)
+	{
+		edges_rechts = rechts;
+	}
+	long long int avg_edges = (edges_links+edges_rechts)/2;
+	int distance = avg_edges * 0.025;
+	static long long int last_distance = 0;
+	if (last_distance != distance){
+		writeInt(distance);
+		last_distance = distance;
+	}
+	
+}
+
+ISR(INT0_vect)
+{
+	static long long int edges_links = 0;
+	edges_links++;
+	setDistance(edges_links, 0);
+}
+
+ISR(INT1_vect)
+{
+	static long long int edges_rechts = 0;
+	edges_rechts++;
+	setDistance(0 , edges_rechts);
+}
+
+void DriveSpecific( char k){
+	
 }
