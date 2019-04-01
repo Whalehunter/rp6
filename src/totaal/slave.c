@@ -21,6 +21,7 @@ void init_update_interval();
 typedef struct {
         int speed;
         int dir;
+        int distance;
 } RP6_Update;
 
 /* Speed settings RP6 ********************************************************/
@@ -244,7 +245,6 @@ void drive(char x) {
 		RP6_Execute_Speed(&rp6);
 		break;
         }
-
 }
 
 void init_update_interval() {
