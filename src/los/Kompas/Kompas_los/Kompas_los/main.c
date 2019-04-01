@@ -128,3 +128,29 @@ uint16_t getBearing(){
 	bearing = bearing + getCompassRegister(3);
 	return bearing;
 }
+
+int main(void) {
+	printf("hallo")
+	init_Compass();
+	while (1)
+	{
+	uint16_t robot_bearing = getBearing();
+	transmitByte(robot_bearing);
+		
+void USART_print(char line[]){
+	uint8_t count = 0
+	while(line[count]! = 0){
+		transmitByte(line[count]);
+		count++;
+	}
+
+void USART_printline(char line[]){
+	USART_print(line);
+	transmitByte(10);
+	transmitByte(13);
+	
+void USART_print_int(uint16_t value){
+	char str [10];
+	printf(str, "%d",value);
+	USART_print(str);
+	
