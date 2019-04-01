@@ -90,23 +90,7 @@ ISR(INT1_vect)
 	setDistance(0 , edges_rechts);
 }
 
-void writeChar(char c) {
-	while(~UCSRA & (1 << UDRE));
-	UDR = c;
-}
 
-void writeString(char st[]) {
-	for(uint8_t i = 0 ; st[i] != 0 ; i++) {
-		writeChar(st[i]);
-	}
-}
-
-void writeInt(volatile int i) {
-	char buffer[10000];
-	itoa(i,buffer,10);
-	writeString(buffer);
-	writeChar('\n');
-}
 
 void init()
 {
@@ -125,4 +109,22 @@ void initUSART() {
 	UCSRC = (1 << UCSZ1) | (1 << UCSZ0); // 8 data bits, 1 stop bit
 	UBRRH = 00;
 	UBRRL = 12; // baudrate 38.4 k
+}
+
+void writeChar(char c) {
+	while(~UCSRA & (1 << UDRE));
+	UDR = c;
+}
+
+void writeString(char st[]) {
+	for(uint8_t i = 0 ; st[i] != 0 ; i++) {
+		writeChar(st[i]);
+	}
+}
+
+void writeInt(volatile int i) {
+	char buffer[10000];
+	itoa(i,buffer,10);
+	writeString(buffer);
+	writeChar('\n');
 }
