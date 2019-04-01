@@ -1,9 +1,14 @@
-2w/*
+/*
  * Afstand_RP6_1.0.c
  *
  * Created: 29-3-2019 16:06:41
  * Author : mgjho
  */ 
+ 
+
+#include <avr/io.h>
+#include <stdlib.h>
+#include <avr/interrupt.h>
 
 #define F_CPU 8000000
 #define BAUD 9600
@@ -31,42 +36,29 @@ int main (void)
 	PORTC &= ~(1 << PINC3);
 	OCR1A = 125;
 	OCR1B = 125;
+
+	while(1)
+	{
+		
+	}
 	
-	 while(1)
-	 {
-			
-				writeInt(distance);
-				//_delay_ms(50);
-			}
-			//writeChar(distance);
-	 }
 	return 0;
 }
 
 
-/*
-#define uint16_t Targ_ENC_A 
-#define uint16_t Targ_ENC_B 
-*/
-
 void init_ENC_interrupt(){
 	PORTB |= (1<<PINB4);
-	DDRD &= ~((1<<PD2) | (1<<PD3)); // Instellen van PD2 en PD3 
+	DDRD &= ~((1<<PD2) | (1<<PD3)); // Instellen van PD2 en PD3
 	PORTD |= (1<<PD2) |(1<<PD3);
 	MCUCR |= (1<<ISC10) | (1<<ISC00);
-	GICR |= (1<<INT0) | (1<<INT1);		// Interrupt 
+	GICR |= (1<<INT0) | (1<<INT1);  // Interrupt
 }
 
-/*
-void disableDistance(){
-	Targ_ENC_A = 0XFFFF;
-	Targ_ENC_B = 0XFFFF;
-}
-*/
 
 void setDistance(uint16_t links, uint16_t rechts){
-	volatile int edges_links = 0;
-	volatile int edges_rechts = 0;
+	static long long int edges_links = 0;
+	static long long int edges_rechts = 0;
+
 	if (links != 0)
 	{
 		edges_links = links;
@@ -75,33 +67,26 @@ void setDistance(uint16_t links, uint16_t rechts){
 	{
 		edges_rechts = rechts;
 	}
-	volatile int avg_edges = (edges_links+edges_rechts)/2;
-	volatile int distance = avg_edges / 0.025;
-
-	/*
-	if(distance != 0){
-		transmistChar('$');
-		writeIntDecimal((uint16_t)(distance_cm / 0.025));
-		Targ_ENC_A = (uint16_t)(distance_cm / 0,025);
-		Targ_ENC_B = (uint16_t)(distance_cm / 0,025);
+	long long int avg_edges = (edges_links+edges_rechts)/2;
+	int distance = avg_edges * 0.025;
+	static long long int last_distance = 0;
+	if (last_distance != distance){
+		writeInt(distance);
+		last_distance = distance;
 	}
-	else{
-		disableDistance();
-	}
-	*/
-	writeInt(distance);
+	
 }
 
 ISR(INT0_vect)
 {
-	volatile int edges_links = 0;
+	static long long int edges_links = 0;
 	edges_links++;
 	setDistance(edges_links, 0);
 }
 
 ISR(INT1_vect)
 {
-	volatile int edges_rechts = 0;
+	static long long int edges_rechts = 0;
 	edges_rechts++;
 	setDistance(0 , edges_rechts);
 }
@@ -118,10 +103,10 @@ void writeString(char st[]) {
 }
 
 void writeInt(volatile int i) {
-	char buffer[8];
+	char buffer[10000];
 	itoa(i,buffer,10);
 	writeString(buffer);
-	writeChar(' ');
+	writeChar('\n');
 }
 
 void init()
@@ -137,8 +122,8 @@ void init()
 
 void initUSART() {
 	UCSRA = 0;
-	UCSRB = (1 << TXEN) | (1 << RXEN) | (1 << RXCIE); // enable USART Transmitter
+	UCSRB = (1 << TXEN); // | (1 << RXEN) | (1 << RXCIE); // enable USART Transmitter
 	UCSRC = (1 << UCSZ1) | (1 << UCSZ0); // 8 data bits, 1 stop bit
 	UBRRH = 00;
-	UBRRL = 103; // baudrate 9600
+	UBRRL = 12; // baudrate 38.4 k
 }
