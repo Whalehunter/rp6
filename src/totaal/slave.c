@@ -15,40 +15,41 @@ void drive(char x);
 uint8_t timert(int x);
 void init_leds();
 void i2c_send(char data);
+void init_update_interval();
 
 /* If a setting needs updating in while loop *********************************/
 typedef struct {
-	int speed;
-	int dir;
+        int speed;
+        int dir;
 } RP6_Update;
 
 /* Speed settings RP6 ********************************************************/
 typedef struct {
-	int cur;
-	int prev;
-	int next;
+        int cur;
+        int prev;
+        int next;
 } RP6_Speed;
 
 /* Full settings RP6 *********************************************************/
 typedef struct {
-	RP6_Speed speed;
-	char dir;
-	int blinkerCount;
-	RP6_Update update;
+        RP6_Speed speed;
+        char dir;
+        int blinkerCount;
+        RP6_Update update;
 } RP6_Full;
 
 void RP6_SetBlinker(RP6_Full * RP6); /* Update RP6 knipperlicht */
 void RP6_SetSpeed(RP6_Full * RP6, char speed); /* Update RP6 speed geleidelijk */
 void RP6_SetDirection(RP6_Full * RP6, char direction); /* Update RP6 richting */
-char RP6_GetDirection(RP6_Full * RP6);		       /* Get current direction of RP6 */
-void RP6_SetCurrentSpeed(RP6_Full * RP6);	 /* Set acceleration for next item */
+char RP6_GetDirection(RP6_Full * RP6);                 /* Get current direction of RP6 */
+void RP6_SetCurrentSpeed(RP6_Full * RP6);        /* Set acceleration for next item */
 
 /*****************************************************************************/
 /*      De "Execute" functies zijn in princepe alleen voor RP6_Execute.      */
 /*****************************************************************************/
-void RP6_Execute(RP6_Full * RP6);		 /* Execute RP6 settings */
-void RP6_Execute_Direction(RP6_Full * RP6);	 /* Execute drive direction */
-void RP6_Execute_Blinker(RP6_Full * RP6);	 /* Execute blinker toggles */
+void RP6_Execute(RP6_Full * RP6);                /* Execute RP6 settings */
+void RP6_Execute_Direction(RP6_Full * RP6);      /* Execute drive direction */
+void RP6_Execute_Blinker(RP6_Full * RP6);        /* Execute blinker toggles */
 void RP6_Execute_Speed(RP6_Full * RP6); /* Execute RP6 speed */
 
 void RP6_SetBlinker(RP6_Full * RP6) {
@@ -56,7 +57,23 @@ void RP6_SetBlinker(RP6_Full * RP6) {
 }
 
 void RP6_SetSpeed(RP6_Full * RP6, char speed) {
-        int newSpeed = 50 * (int)speed;
+        int newSpeed;
+
+        switch(speed){
+        case '1':
+                newSpeed = 50;
+                break;
+        case '2':
+                newSpeed = 125;
+                break;
+        case '3':
+                newSpeed = 175;
+                break;
+        case 'q':
+                newSpeed = 0;
+                break;
+        }
+
         if (RP6->speed.next != newSpeed) {
                 RP6->speed.next = newSpeed;
                 RP6->update.speed = 1;
@@ -85,7 +102,9 @@ void RP6_SetCurrentSpeed(RP6_Full * RP6) {
         int inc = 1;
         if (RP6->speed.cur > RP6->speed.next) {
                 inc = -1;
-        }
+        } else if (RP6->speed.cur == 0) {
+		RP6->speed.cur = 10;
+	}
 
         RP6->speed.cur += inc;
 
@@ -149,24 +168,22 @@ void RP6_Execute_Speed(RP6_Full * RP6) {
         OCR1B = RP6->speed.cur;
 }
 
-static RP6_Full rp6 = {{0,0,0},	/* Speed */
-		       'w',	/* Direction */
-		       0,
-		       {0,0}};	/* Updates */
+static RP6_Full rp6 = {{0,0,0}, /* Speed */
+                       'w',     /* Direction */
+                       0,       /* Blinker counter */
+                       {0,0}};  /* Updates */
 
 int main(void){
-	cli();			/* Disable global interrupts */
+        cli();                  /* Disable global interrupts */
         init_motors();
         init_leds();
         i2c_init();
-        sei();			/* Enable global interrupts */
+        init_update_interval();
+        sei();                  /* Enable global interrupts */
 
-        while(1) {
-		if (rp6.update.speed) {
-			RP6_SetCurrentSpeed(&rp6);
-		}
-		RP6_Execute(&rp6);
-	}
+	while(1) {
+                RP6_Execute(&rp6);
+        }
         return 0;
 }
 
@@ -175,14 +192,14 @@ ISR(TWI_vect) {
         switch(TWSR) {
         case 0x80: // Addressed with own SLA+W; data received; ACK send
                 drive(TWDR);
-		break;
+                break;
         case 0xA8: // Own SLA+R has been received; ACK has been returned
         case 0xB8: // Data byte in TWDR has been send; ACK has been received
-		i2c_send(RP6_GetDirection(&rp6));
-		break;
+                i2c_send(RP6_GetDirection(&rp6));
+                break;
         case 0xC0: // Data byte in TWDR has been send; NACK has been received
-		drive('0');
-		break;
+                drive('0');
+                break;
         }
         TWCR |= (1<<TWINT); // Clear TWINT Flag
 }
@@ -194,7 +211,7 @@ void i2c_init() {
 }
 
 void i2c_send(char data) {
-	TWDR = data;
+        TWDR = data;
 }
 
 void init_usart(){
@@ -206,20 +223,33 @@ void init_usart(){
 }
 
 void drive(char x) {
-	switch(x) {
-	case 'w':
-	case 'a':
-	case 's':
-	case 'd':
-		RP6_SetDirection(&rp6, x);
+        switch(x) {
+        case 'w':
+        case 'a':
+        case 's':
+        case 'd':
+                RP6_SetDirection(&rp6, x);
+                break;
+        case '1':
+        case '2':
+        case '3':
+                RP6_SetSpeed(&rp6, x);
+                break;
+        case 'q':
+                RP6_SetSpeed(&rp6, x);
+                break;
+	case '8':
+		rp6.speed.next = 0;
+		rp6.speed.cur = 0;
+		RP6_Execute_Speed(&rp6);
 		break;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-		RP6_SetSpeed(&rp6, x);
-		break;
-	}
+        }
+
+}
+
+void init_update_interval() {
+        TCCR2 |= (1 << CS22) | (1 << CS21) | (1 << CS20);
+        TIMSK |= (1 << TOIE2);
 }
 
 void init_motors() {
@@ -241,7 +271,14 @@ void init_leds(){
         OCR0 = 77; // Output compare: 77 (80000/1024)
 }
 
+ISR(TIMER2_OVF_vect) {
+        if (rp6.update.speed) {
+                RP6_SetCurrentSpeed(&rp6);
+                RP6_Execute_Speed(&rp6);
+        }
+}
+
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
-	rp6.blinkerCount++;
+        rp6.blinkerCount++;
 }
