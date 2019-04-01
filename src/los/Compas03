@@ -79,7 +79,11 @@ uint16_t getBearing(){
 	uint16_t bearing = 0;
 	bearing = getCompassRegister(2);
 	bearing = (bearing << 8); // register 2 naar high byte
-	bearing = bearing + getCompassRegister(3);	
+	bearing = bearing + getCompassRegister(3);
+// Delen van de 360 graden cirkel op in stukjes van 45graden. 
+// De module geeft waardes tussen 0-3599.
+// Door deze deling komen er 8 stukken vrij. Het 8ste stuk zou ook bij Noord horen, dit opgelost door
+// een if aan te maken.
 		if ((bearing < 0)
 			|| (bearing > 3599)){
 			return 8;
@@ -109,28 +113,5 @@ const char *richting[()] = {
   "Noord-West",
   "Fout"
 };
-// Testen van de functie
 
-}
-// Delen van de 360 graden cirkel op in stukjes van 45graden. 
-// De module geeft waardes tussen 0-3599.
-// Door deze deling komen er 8 stukken vrij. Het 8ste stuk zou ook bij Noord horen, dit opgelost door
-// een if aan te maken.
-int test(int bearing)
-{	
-	if ((bearing < 0)
-		|| (bearing > 3599)){
-			return 8;
-		}
-	// 450.0 gebruikt want anders is er een integer deling en krijg je afrondings problemen.	
-	float part = bearing / 450.0;
-	int wijzerindex = (int)(round(part));
-	if (wijzerindex == 8)
-	{ 
-		return 0;
-	} else 
-	{	
-		return wijzerindex;
-	}
 
-}
