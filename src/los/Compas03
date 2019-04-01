@@ -79,11 +79,24 @@ uint16_t getBearing(){
 	uint16_t bearing = 0;
 	bearing = getCompassRegister(2);
 	bearing = (bearing << 8); // register 2 naar high byte
-	bearing = bearing + getCompassRegister(3);
-	prinft("%s", richting[(bearing)])
-	return bearing;
-}
-
+	bearing = bearing + getCompassRegister(3);	
+		if ((bearing < 0)
+			|| (bearing > 3599)){
+			return 8;
+		}
+	// 450.0 gebruikt want anders is er een integer deling en krijg je afrondings problemen.	
+		float part = bearing / 450.0;
+		int wijzerindex = (int)(round(part));
+	if (wijzerindex == 8)
+	{ 
+		return 0;
+	} else 
+	{	
+		prinft("%s", richting[(bearing)])
+		return bearing;
+		return wijzerindex;
+	}
+	
 // String Array gemaakt om zo de omschrijving van de richting aan te geven.
 const char *richting[()] = {
   "Noord",
