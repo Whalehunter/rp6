@@ -1,8 +1,91 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <avr/io.h>
+
+#define F_SCL 100000UL // SCL frequency
+#define F_CPU 16000000UL
+#define COMPASS_AD 0x60 // I2C adress of kompas
+
+void init_compass();
+uint8_t getCompassRegister(uint8_t aRegister);
+uint16_t getBearing();
+void init_usart();
+
+int main(void)
+{
+    init_compass();
+	//init_usart();
+	
+    while (1) 
+    {
+		uint16_t robot_bearing = getBearing();
+		//transmitByte(robot_bearing); // Functie transmit byte nodig
+    }
+}
+
+void init_compass(){
+	TWSR = 0;
+	TWAR = (COMPASS_AD <<1);
+	TWCR |= (1<<TWEA) | (1<<TWIE) | (1<<TWEN);
+}
+
+uint8_t getCompassRegister(uint8_t aRegister){
+	// START conditie
+	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<< TWEN);
+	while (!(TWCR & (1<<TWINT)));
+	
+	// Set I2C adress
+	
+	TWDR = (COMPASS_AD <<1);
+	TWCR = (1<< TWINT) | (1<< TWEN);
+	
+	while (!(TWCR & (1<<TWINT)));
+	
+	// Select register 
+	TWDR = aRegister;
+	// Start write operation
+	TWCR = (1<<TWINT) | (1<<TWEN);
+	while (!(TWCR & (1<<TWINT)));
+	
+	// STOP condition
+	TWCR = (1<< TWINT) | (1<< TWSTO) | (1<<TWEN);
+	
+	// START conditie
+	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+	while (!(TWCR & (1<<TWINT)));
+	
+	// Set I2C adress
+	TWDR = (COMPASS_AD << 1 ) + 1; // Nu gaan lezen
+	TWCR = (1 << TWINT) | (1<<TWEN);
+	
+	while (!(TWCR & (1<<TWINT)));
+	
+	TWCR = (1<<TWINT) | (1<< TWEN);
+	while (!(TWCR & (1<<TWINT)));
+	
+	uint8_t received_byte = TWDR;
+	uint8_t status_byte = TWSR;
+	
+	// STOP condition
+	TWCR = (1<< TWINT) | (1<<TWSTO) | (1<<TWEN);
+	
+	return received_byte;
+}
+
+uint16_t getBearing(){
+	// Voor hoge nauwkeurigheid register 2 en 3, HIGH byte first
+	
+	uint16_t bearing = 0;
+	bearing = getCompassRegister(2);
+	bearing = (bearing << 8); // register 2 naar high byte
+	bearing = bearing + getCompassRegister(3);
+	prinft("%s", richting[(bearing)])
+	return bearing;
+}
+
 // String Array gemaakt om zo de omschrijving van de richting aan te geven.
-const char *richting[] = {
+const char *richting[()] = {
   "Noord",
   "Noord-Oost",
   "Oost",
@@ -14,56 +97,20 @@ const char *richting[] = {
   "Fout"
 };
 // Testen van de functie
-int main(void)
-{	
-	int fd;														// File descrition
-	char *fileName = "/dev/i2c-1";								// Name of the port we will be using
-	int  address = 0x60;										// Address of CMPS03 shifted right one bit
-	unsigned char buf[10];										// Buffer for data being read/ written on the i2c bus
-	
-	if ((fd = open(fileName, O_RDWR)) < 0) {					// Open port for reading and writing
-		printf("Failed to open i2c port\n");
-		exit(1);
-	}
-	
-	if (ioctl(fd, I2C_SLAVE, address) < 0) {					// Set the port options and set the address of the device we wish to speak to
-		printf("Unable to get bus access to talk to slave\n");
-		exit(1);
-	}
-		
-	buf[0] = 0;													// This is the register we want to read from
-	
-	if ((write(fd, buf, 1)) != 1) {								// Send register we want to read from	
-		printf("Error writing to i2c slave\n");
-		exit(1);
-	}
-	
-	if (read(fd, buf, 4) != 4) {								// Read back data into buf[]
-		printf("Unable to read from slave\n");
-		exit(1);
-	}
-	else {
-		unsigned char highByte = buf[2];
-		unsigned char lowByte = buf[3];
-		unsigned int graden = (highByte <<8) + lowByte/10;	
-		prinft("%s", richting[graden()])
-	}
-	
-	
-	return 0;
+
 }
 // Delen van de 360 graden cirkel op in stukjes van 45graden. 
 // De module geeft waardes tussen 0-3599.
 // Door deze deling komen er 8 stukken vrij. Het 8ste stuk zou ook bij Noord horen, dit opgelost door
 // een if aan te maken.
-int test(int graden)
+int test(int bearing)
 {	
-	if ((graden < 0)
-		|| (graden > 3599)){
+	if ((bearing < 0)
+		|| (bearing > 3599)){
 			return 8;
 		}
 	// 450.0 gebruikt want anders is er een integer deling en krijg je afrondings problemen.	
-	float part = graden / 450.0;
+	float part = bearing / 450.0;
 	int wijzerindex = (int)(round(part));
 	if (wijzerindex == 8)
 	{ 
