@@ -7,6 +7,7 @@
 #include <avr/interrupt.h>
 
 #define SLA 56
+#define BLINK 32
 
 void i2c_init();
 void init_motors();
@@ -53,7 +54,7 @@ void RP6_Execute_Blinker(RP6_Full * RP6);        /* Execute blinker toggles */
 void RP6_Execute_Speed(RP6_Full * RP6); /* Execute RP6 speed */
 
 void RP6_SetBlinker(RP6_Full * RP6) {
-        RP6->blinkerCount = 20;
+        RP6->blinkerCount = BLINK;
 }
 
 void RP6_SetSpeed(RP6_Full * RP6, char speed) {
@@ -117,7 +118,7 @@ void RP6_Execute(RP6_Full * RP6) {
         if (RP6->update.dir) {
                 RP6_Execute_Direction(RP6);
         }
-        if (RP6->blinkerCount > 20) {
+        if (RP6->blinkerCount > BLINK) {
                 RP6_Execute_Blinker(RP6);
         }
         if (RP6->update.speed) {
@@ -147,20 +148,20 @@ void RP6_Execute_Direction(RP6_Full * RP6) {
 }
 
 void RP6_Execute_Blinker(RP6_Full * RP6) {
-        switch(RP6->dir) {
-        case 'a':
-                PORTC ^= (1 << PINC4); /* Toggle left blinker */
-                PORTB &= ~(1 << PINB7); /* Disable right blinker */
-                break;
-        case 'd':
+	if (RP6->speed.cur > 0 && (RP6->dir == 'a' || RP6->dir == 'd')) {
+		if (RP6->dir == 'a') {
+			PORTC ^= (1 << PINC4); /* Toggle left blinker */
+			PORTB &= ~(1 << PINB7); /* Disable right blinker */
+		} else {
+			PORTC &= ~(1 << PINC4); /* Disable left blinker */
+			PORTB ^= (1 << PINB7);  /* Toggle right blinker */
+		}
+	} else {
                 PORTC &= ~(1 << PINC4); /* Disable left blinker */
-                PORTB ^= (1 << PINB7);  /* Toggle right blinker */
-                break;
-        default:
-                PORTC &= ~(1 << PINC4); /* Disable left blinker */
                 PORTB &= ~(1 << PINB7); /* Disable right blinker */
-                break;
-        }
+	}
+
+	RP6->blinkerCount = 0; 	/* Reset blinker count */
 }
 
 void RP6_Execute_Speed(RP6_Full * RP6) {
@@ -244,7 +245,6 @@ void drive(char x) {
 		RP6_Execute_Speed(&rp6);
 		break;
         }
-
 }
 
 void init_update_interval() {
@@ -254,21 +254,19 @@ void init_update_interval() {
 
 void init_motors() {
         TCNT1 = 0;
-
-        TCCR1A |= (1 << COM1A1)|(1 << COM1B1)|(1 << WGM11); // set output to high on compare + pwm 9-bit
-        TCCR1B |= (1 << WGM13)|(1 << CS10); // no prescaler + pwm, phase & frequency correct
-
-        ICR1 = 0x00FF; // set interrupt
+        TCCR1A |= (1 << COM1A1) | (1 << COM1B1) | (1 << WGM11); // set output to high on compare + pwm 9-bit
+        TCCR1B |= (1 << WGM13) | (1 << CS10); // no prescaler + pwm, phase & frequency correct
         DDRC |= (1 << PINC2) | (1 << PINC3);
+        ICR1 = 0x00FF; // set interrupt
 }
 
 void init_leds(){
-        DDRB |= (1 << PIN7); /* PB7 als OUTPUT */
+        DDRB |= (1 << PINB7); /* PB7 als OUTPUT */
         DDRC |= (1 << PINC4); /* PC4 als OUTPUT */
         TIMSK = (1 << OCIE0); /* Timer overflow ENABLE */
-        TCCR0 |= (1 << COM00) | (1<<WGM01); // CTC ENABLE
-        TCCR0 |= (1<<CS02) | (1<<CS00); // Prescaler: 1024
-        OCR0 = 77; // Output compare: 77 (80000/1024)
+        TCCR0 |= (1 << COM00) | (1 << WGM01); // CTC ENABLE
+        TCCR0 |= (1 << CS02) | (1 << CS00); // Prescaler: 1024
+        OCR0 = 244; // 16 blinkercount nu nodig om ~1hz te hebben
 }
 
 ISR(TIMER2_OVF_vect) {
@@ -280,5 +278,5 @@ ISR(TIMER2_OVF_vect) {
 
 ISR(TIMER0_COMP_vect) // Interrupt Service Routine
 {
-        rp6.blinkerCount++;
+        rp6.blinkerCount += 1;
 }
