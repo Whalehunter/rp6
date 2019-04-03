@@ -88,7 +88,7 @@ ISR(USART0_RX_vect){
 }
 
 void initSonar(){
-	TCCR4B |= (1 << ICES4)| (1 << CS12) | (1 << WGM12) | (1 << ICNC4); //  Input Capture on rising edge, IC noice canceler 1, prescaler 256, CTC mode (OCR TOP)
+	TCCR4B |= (1 << ICES4)| (1 << CS12) | (1 << WGM12) | (1 << ICNC4); //  Input Capture on rising edge, IC noise canceler 1, prescaler 256, CTC mode (OCR TOP)
 	TIMSK4 |= (1 << OCIE1A); // enable OCR interrupt
 	
 	TIMSK4 &= ~(1 << ICIE4); // disable input capture interrupt
