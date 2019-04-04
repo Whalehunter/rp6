@@ -16,14 +16,12 @@ uint8_t timert(int x);
 void init_leds();
 void i2c_send(char data);
 void init_update_interval();
-void setDistance(uint16_t links, uint16_t rechts);
 void init_ENC_interrupt();
 
 /* If a setting needs updating in while loop *********************************/
 typedef struct {
 	int speed;
 	int dir;
-	long int distance;
 } RP6_Update;
 
 /* Speed settings RP6 ********************************************************/
@@ -33,14 +31,22 @@ typedef struct {
 	int next;
 } RP6_Speed;
 
+/* Wheel settings RP6 ********************************************************/
+typedef struct {
+	int right;
+	int left;
+} RP6_Distance;
+
 /* Full settings RP6 *********************************************************/
 typedef struct {
 	RP6_Speed speed;
+	RP6_Distance distance;
 	char dir;
 	int blinkerCount;
 	RP6_Update update;
 } RP6_Full;
 
+void RP6_SetDistance(RP6_Full * RP6);	       /* Update RP6 afstand */
 void RP6_SetBlinker(RP6_Full * RP6); /* Update RP6 knipperlicht */
 void RP6_SetSpeed(RP6_Full * RP6, char speed); /* Update RP6 speed geleidelijk */
 void RP6_SetDirection(RP6_Full * RP6, char direction); /* Update RP6 richting */
@@ -248,7 +254,7 @@ void drive(char x) {
 		RP6_Execute_Speed(&rp6);
 		break;
 		case 'm':
-		// 
+		//
 	}
 }
 
@@ -298,41 +304,16 @@ void init_ENC_interrupt(){
 }
 
 
-void setDistance(RP6_Full * RP6, uint16_t links, uint16_t rechts){
-	static long long int edges_links = 0;
-	static long long int edges_rechts = 0;
-
-	if (links != 0)
-	{
-		edges_links = links;
-	}
-	if (rechts != 0)
-	{
-		edges_rechts = rechts;
-	}
-	
-	long long int avg_edges = (edges_links+edges_rechts)/2;
-	RP6->update.distance = avg_edges * 0.025;
-	static long long int last_distance = 0;
-	if (last_distance != RP6->update.distance){
-		i2c_send(RP6->update.distance);
-		last_distance = RP6->update.distance;
-	}
-
+void setDistance(RP6_Full * RP6){
+	i2c_send((RP6->distance.left + RP6->distance.right) * 0.05); /* TODO: Converteren naar iets dat werkelijk verzonden kan worden */
 }
 
-ISR(INT0_vect)
-{
-	static long long int edges_links = 0;
-	edges_links++;
-	setDistance(&rp6, edges_links, 0);
+ISR(INT0_vect) {
+	rp6.distance.left++;
 }
 
-ISR(INT1_vect)
-{
-	static long long int edges_rechts = 0;
-	edges_rechts++;
-	setDistance(&rp6, 0 , edges_rechts);
+ISR(INT1_vect) {
+	rp6.distance.right++;
 }
 
 /*
