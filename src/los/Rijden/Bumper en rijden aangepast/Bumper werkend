@@ -15,7 +15,6 @@ void rijden(char x);
 
 
 //bumpers
-void cycleDelay();
 int BumperStatusLinks();
 int BumperStatusRechts();
 void parkour();
@@ -142,8 +141,7 @@ int BumperStatusLinks()
 	DDRB &= ~(1 << PINB0);
 
 	PORTB &= ~(1 << PINB0);
-	asm("nop");
-
+	
 
 	int BumperTriggerLinks = PINB & (1 << PINB0);
 
@@ -166,7 +164,7 @@ int BumperStatusRechts()
 	int PORTCNu = PORTC;
 	DDRC &= ~(1 << PINC6);
 	PORTC &= ~(1 << PINC6);
-	asm("nop");
+	
 
 	int BumperTriggerRechts = PINC & (1 << PINC6);
 
@@ -181,16 +179,3 @@ int BumperStatusRechts()
 	return 0;
 }
 
-void parkour()
-{
-
-	while(1)
-	{
-		PORTC &= ~(1 << PINC2);
-		PORTC &= ~(1 << PINC3);
-		
-		PORTC |= (1 << PINC2);
-		PORTC |= (1 << PINC3);
-
-	}
-}
