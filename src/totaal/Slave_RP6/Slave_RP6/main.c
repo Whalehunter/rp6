@@ -17,6 +17,8 @@ void init_leds();
 void i2c_send(char data);
 void init_update_interval();
 void init_ENC_interrupt();
+int BumperStatusLinks();
+int BumperStatusRechts();
 
 /* If a setting needs updating in while loop *********************************/
 typedef struct {
@@ -182,6 +184,10 @@ static RP6_Full rp6 = {{0,0,0}, /* Speed */
 0,       /* Blinker counter */
 {0,0,0}};  /* Updates */
 
+
+
+
+
 int main(void){
 	cli();                  /* Disable global interrupts */
 	init_motors();
@@ -191,10 +197,16 @@ int main(void){
 	sei();                  /* Enable global interrupts */
 
 	while(1) {
-		RP6_Execute(&rp6);
+	RP6_Execute(&rp6);
+	BumperStatusLinks();
+	BumperStatusRechts();
 	}
 	return 0;
 }
+
+
+
+
 
 ISR(TWI_vect) {
 
@@ -253,8 +265,7 @@ void drive(char x) {
 		rp6.speed.cur = 0;
 		RP6_Execute_Speed(&rp6);
 		break;
-		case 'm':
-		//
+		case 'm':;
 	}
 }
 
@@ -274,7 +285,7 @@ void init_motors() {
 }
 
 void init_leds(){
-	DDRB |= (1 << PIN7); /* PB7 als OUTPUT */
+	DDRB |= (1 << PINB7); /* PB7 als OUTPUT */
 	DDRC |= (1 << PINC4); /* PC4 als OUTPUT */
 	TIMSK = (1 << OCIE0); /* Timer overflow ENABLE */
 	TCCR0 |= (1 << COM00) | (1<<WGM01); // CTC ENABLE
@@ -316,13 +327,51 @@ ISR(INT1_vect) {
 	rp6.distance.right++;
 }
 
-/*
-void driveSpecific(char k) {
-//krijg een waarde vanuit de xbee
-double driveAantal = 0;
-if(driveAantal == RP6->update.distance){
-OCR1A = 0;
-OCR1B = 0;
+
+
+int BumperStatusLinks(RP6_Full * RP6)
+{
+
+	int DDRBNu = DDRB;
+	int PORTBNu = PORTB;
+	DDRB &= ~(1 << PINB0);		// input
+	PORTB &= ~(1 << PINB0);		// leegmaken van de pin
+	asm("nop");
+
+	int BumperTriggerLinks = PINB & (1 << PINB0);
+
+	DDRB = DDRBNu;
+	PORTB = PORTBNu;
+	
+	if (BumperTriggerLinks)
+	{
+		RP6_SetDirection(&rp6, 'd');
+		RP6_SetSpeed(&rp6, '1');
+		return 1;
 	}
+	return 0;
 }
-*/
+
+
+int BumperStatusRechts(RP6_Full * RP6)
+{
+
+	int DDRCNu = DDRC;
+	int PORTCNu = PORTC;
+	DDRC &= ~(1 << PINC6);
+	PORTC &= ~(1 << PINC6);
+	asm("nop");
+
+	int BumperTriggerRechts = PINC & (1 << PINC6);
+
+	DDRC = DDRCNu;
+	PORTC = PORTCNu;
+	if (BumperTriggerRechts)
+	{
+		RP6_SetDirection(&rp6, 'a');
+		RP6_SetSpeed(&rp6, '1');
+		return 1;
+	}
+	return 0;
+}
+
