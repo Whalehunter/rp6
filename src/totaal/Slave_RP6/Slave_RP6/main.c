@@ -174,7 +174,7 @@ void RP6_Execute_Speed(RP6_Full * RP6) {
 static RP6_Full rp6 = {{0,0,0}, /* Speed */
 'w',     /* Direction */
 0,       /* Blinker counter */
-{0,0}};  /* Updates */
+{0,0,0}};  /* Updates */
 
 int main(void){
 	cli();                  /* Disable global interrupts */
@@ -247,6 +247,8 @@ void drive(char x) {
 		rp6.speed.cur = 0;
 		RP6_Execute_Speed(&rp6);
 		break;
+		case 'm':
+		// 
 	}
 }
 
