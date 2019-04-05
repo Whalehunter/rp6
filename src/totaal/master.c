@@ -13,7 +13,6 @@
 #define I2CBUFLEN 2
 
 typedef struct {
-	uint8_t command;
 	uint8_t type;
 	uint8_t buf[10];
 	volatile uint8_t bufIndex;
@@ -109,28 +108,8 @@ void I2C_Ack(char type[]) {
 	}
 }
 
-void I2C_Send(uint8_t data) {
-	TWDR = data;
-	I2C_Ack("NACK");
-}
-
 void I2C_Stop() {
 	TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO) | (1 << TWIE);
-}
-
-void I2C_Write(uint8_t x) {
-	I2C_Start();
-	I2C_Send((SLA << 1) + 0); /* Write data */
-	I2C_Send(x);
-	I2C_Stop();
-}
-
-void I2C_Read() {
-	I2C_Start();
-	I2C_Send((SLA << 1) + 1); /* Read data */
-	/* uint8_t y = I2C_Ack("NACK"); */
-	I2C_Stop();
-	/* USART_Write(y); */
 }
 
 /*****************************************************************************/
