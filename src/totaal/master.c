@@ -173,15 +173,12 @@ void Sonar_Pulse() {
 /*                                   Pieper                                  */
 /*****************************************************************************/
 
-void Pieper_Init() {
+void Pieper_Aan() {
 	TCCR2A = (1 << COM2A0) | (1 << WGM21); /* OC2A on compare match & CTC */
 	OCR2A = 8;
 	TCCR3A = (1 << COM3A1) | (1 << COM3A0);
 	OCR3A = 31250;		/* 500ms output compare */
 	TIMSK3 = (1 << OCIE3A);
-}
-
-void Pieper_Aan() {
 	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
 	TCCR3B = (1 << CS32) | (1 << WGM32);
 }
@@ -206,21 +203,21 @@ Arduino_Full arduino = {{"", 0, 0}, /* USART */
 /*****************************************************************************/
 
 ISR(USART0_RX_vect) {
+	char x = UDR0;
 	arduino.i2c.type = 0;
-	switch(UDR0){
+	switch(x){
 	case 'a':
 	case 'w':
 	case 'd':
 	case 'q':
-	case '0':
 		USART_ResetBuffer(&arduino);
-		arduino.usart.buf[0] = UDR0;
+		arduino.usart.buf[0] = x;
 		I2C_Start();	/* Roep TWI_vect aan */
 		Pieper_Uit();
 		break;
 	case 's':
 		USART_ResetBuffer(&arduino);
-		arduino.usart.buf[0] = UDR0;
+		arduino.usart.buf[0] = x;
 		I2C_Start();	/* Roep TWI_vect aan */
 		Pieper_Aan();
 		break;
@@ -228,7 +225,7 @@ ISR(USART0_RX_vect) {
 	case '2':
 	case '3':
 		USART_ResetBuffer(&arduino);
-		arduino.usart.buf[0] = UDR0;
+		arduino.usart.buf[0] = x;
 		I2C_Start();
 	}
 }
@@ -327,7 +324,6 @@ int main(void) {
 	USART_Init();
 	I2C_Init();
 	Sonar_Init();
-	Pieper_Init();
 	sei();
 
 	while(1) {
