@@ -41,7 +41,7 @@ typedef struct {
 	Arduino_I2C i2c;
 	Arduino_Sonar sonar;
 	uint8_t pieper;
-	Parkour parkour;
+	/* Parkour parkour; */
 } Arduino_Full;
 
 /*****************************************************************************/
@@ -264,7 +264,6 @@ ISR(TWI_vect) {
 		break;
 	case 0x30:		/* Data byte has been transmitted, NOT ACK has been received */
 		I2C_Stop();
-		arduino.i2c.type = 1;
 		break;
 
 	/* SLA+R vanaf hier ******************************************/
