@@ -189,7 +189,6 @@ int main(void){
 }
 
 ISR(TWI_vect) {
-
         switch(TWSR) {
 		/*************************************************************/
 		/*                           SLA+W                           */
@@ -216,9 +215,10 @@ ISR(TWI_vect) {
 		i2c_SetData(RP6_GetDirection(&rp6));
 		break;
         case 0xB8:	    /* Data transmitted, ACK received */
+		i2c_SetData('a');
                 break;
         case 0xC0:		/* Data transmitted, NACK received */
-                drive('0');
+                /* drive('0'); */
                 break;
         }
         TWCR |= (1<<TWINT); // Clear TWINT Flag

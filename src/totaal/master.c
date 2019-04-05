@@ -10,12 +10,12 @@
 #include <util/delay.h>
 
 #define USARTBUFLEN 100
-#define I2CBUFLEN 100
+#define I2CBUFLEN 2
 
 typedef struct {
 	uint8_t command;
 	uint8_t type;
-	volatile uint8_t buf[I2CBUFLEN];
+	uint8_t buf[10];
 	volatile uint8_t bufIndex;
 } Arduino_I2C;
 
@@ -68,7 +68,7 @@ void USART_WriteEOL() {
 	UDR0 = 0x0A;
 }
 
-void USART_WriteString(uint8_t * s) {
+void USART_WriteString(uint8_t s[]) {
 	for (int i = 0; i != 0; ++i) {
 		USART_Write(s[i]);
 	}
@@ -227,6 +227,11 @@ ISR(USART0_RX_vect) {
 		USART_ResetBuffer(&arduino);
 		arduino.usart.buf[0] = x;
 		I2C_Start();
+		break;
+	case 'x':
+		arduino.i2c.type = 1;
+		I2C_Start();
+		break;
 	}
 }
 
@@ -268,14 +273,21 @@ ISR(TWI_vect) {
 
 	/* SLA+R vanaf hier ******************************************/
 	case 0x40:		/* SLA+R has been transmitted, ACK has been received */
-		I2C_Ack("NACK");
+		I2C_Ack("ACK");
 		break;
 	case 0x48:		/* SLA+R has been transmitted, NOT ACK has been received */
 		break;
 	case 0x50:		/* Data has been received, ACK has been transmitted */
+		USART_Write(TWDR);
+		arduino.i2c.bufIndex++;
+		if (arduino.i2c.bufIndex < 10) {
+			I2C_Ack("ACK");
+		} else {
+			I2C_Ack("NACK");
+			arduino.i2c.bufIndex = 0;
+		}
 		break;
 	case 0x58:		/* Data has been received, NOT ACK has been transmitted */
-		USART_Write(TWDR);
 		I2C_Stop();
 		break;
 	}
@@ -325,11 +337,7 @@ int main(void) {
 	Sonar_Init();
 	sei();
 
-	while(1) {
-		if (arduino.i2c.type) {
-			I2C_Start();
-		}
-	}
-
+	while(1)
+		;
         return 0;
 }
