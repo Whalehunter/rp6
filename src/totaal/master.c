@@ -190,7 +190,12 @@ ISR(USART0_RX_vect) {
                 I2C_Start();
 		break;
         case 'p':
-                sonar = !sonar;
+		/**
+		 * TODO:
+		 * print sonar distance (geen i2c)
+		 * print total driving distance (i2c)
+		 * print direction (kompas)
+		 */
 		break;
         }
 }
