@@ -288,7 +288,7 @@ ISR(TIMER4_CAPT_vect) {
 		TCCR4B |= (1 << ICES4);
 		arduino.sonar.end = ICR4;
 		if (Sonar_GetDistance(&arduino) <= 8) {
-			arduino.i2c.command = '8';
+			arduino.i2c.buf[0] = '8';
 			arduino.i2c.type = 0;
 			I2C_Start();
 		}
