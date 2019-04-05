@@ -120,6 +120,15 @@ void Sonar_Init() {
 	TCCR0B |= (1 << CS00); 	/* Enable no prescaler TCNT0 */
 }
 
+uint8_t Sonar_GetDistance(Arduino_Full * a) {
+	uint16_t distance = (((a->sonar.end - a->sonar.start) * 0.2704) - 14);
+	if (distance > 255) {
+		return 255;
+	}
+
+	return distance;
+}
+
 void Sonar_Pulse() {
 	DDRL |= (1 << PL0); // PL0 = ICP4
 	PORTL |= (1 << PL0);
@@ -255,8 +264,7 @@ ISR(TIMER4_CAPT_vect) {
 	} else {		        /* Falling edge */
 		TCCR4B |= (1 << ICES4);
 		arduino.sonar.end = ICR4;
-		uint8_t distance = (((arduino.sonar.end - arduino.sonar.start) * 0.2704) - 14);
-		if (distance <= 8) {
+		if (Sonar_GetDistance(&arduino) <= 8) {
 			arduino.i2c.command = '8';
 			arduino.i2c.type = 0;
 			I2C_Start();
