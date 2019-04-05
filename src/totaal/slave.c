@@ -253,8 +253,6 @@ void drive(char x) {
         case '1':
         case '2':
         case '3':
-                RP6_SetSpeed(&rp6, x);
-                break;
         case 'q':
                 RP6_SetSpeed(&rp6, x);
                 break;
