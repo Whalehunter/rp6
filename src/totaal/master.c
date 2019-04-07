@@ -14,7 +14,7 @@
 
 typedef struct {
 	uint8_t type;
-	uint8_t buf[10];
+	uint8_t buf[I2CBUFLEN];
 	volatile uint8_t bufIndex;
 } Arduino_I2C;
 
@@ -30,7 +30,7 @@ typedef struct {
 } Arduino_USART;
 
 typedef struct {
-	volatile uint8_t travelDistance;
+	volatile uint16_t travelDistance;
 	volatile uint8_t direction;
 	volatile uint8_t speed;
 } Parkour;
@@ -42,6 +42,28 @@ typedef struct {
 	uint8_t pieper;
 	/* Parkour parkour; */
 } Arduino_Full;
+
+void uitoa(uint16_t value, uint8_t* buffer)
+{
+	uint8_t i, printed = 0;
+	uint16_t digit, divisor;
+
+	if (value) {
+		for(i = 0, divisor = 10000; i < 5u; i++) {
+			digit = value/divisor;
+			if(digit || printed) {
+				*buffer++ = '0' + digit;
+				value -= digit*divisor;
+				printed = 1;
+			}
+			divisor /= 10;
+		}
+	} else {
+		*buffer++ = '0';
+	}
+
+    *buffer = '\0';
+}
 
 /*****************************************************************************/
 /*                                   USART                                   */
@@ -71,6 +93,20 @@ void USART_WriteString(uint8_t s[]) {
 	for (int i = 0; i != 0; ++i) {
 		USART_Write(s[i]);
 	}
+	USART_WriteEOL();
+}
+
+void USART_WriteDistance(Arduino_Full * ARDUINO) {
+	uint16_t num = (ARDUINO->usart.buf[0] << 8) | ARDUINO->usart.buf[1];
+	uint8_t i, distanceString[] = "De afgelegde afstand:", totalDistance[10];
+	uitoa(num, totalDistance);
+
+	USART_WriteString(distanceString);
+	for (i = 0; i != 0; ++i) {
+		USART_Write(totalDistance[i]);
+	}
+	USART_Write('c');
+	USART_Write('m');
 	USART_WriteEOL();
 }
 
@@ -172,10 +208,10 @@ void Pieper_Uit() {
 /*             Hier begint de Arduino struct & de ISR definities             */
 /*****************************************************************************/
 
-Arduino_Full arduino = {{"", 0, 0}, /* USART */
-			{0, 0, "", 0}, /* I2C */
-			{0, 0},	       /* SONAR */
-			1};	       /* PIEPER */
+Arduino_Full arduino = {{"", 0, 0}, 	/* USART */
+			{0, 0, "", 0},	/* I2C */
+			{0, 0},		/* SONAR */
+			1};		/* PIEPER */
 
 /*****************************************************************************/
 /*                              USART interrupt                              */
@@ -183,7 +219,7 @@ Arduino_Full arduino = {{"", 0, 0}, /* USART */
 
 ISR(USART0_RX_vect) {
 	char x = UDR0;
-	arduino.i2c.type = 0;
+	arduino.i2c.type = 0;	/* I2C SLA+W modus */
 	switch(x){
 	case 'a':
 	case 'w':
@@ -208,7 +244,7 @@ ISR(USART0_RX_vect) {
 		I2C_Start();
 		break;
 	case 'x':
-		arduino.i2c.type = 1;
+		arduino.i2c.type = 1; /* I2C SLA+R modus */
 		I2C_Start();
 		break;
 	}
@@ -227,7 +263,9 @@ ISR(TWI_vect) {
 		I2C_Ack("ACK");
 		break;
 
-	/* SLA+W vanaf hier ******************************************/
+		/*************************************************************/
+		/*                           SLA+W                           */
+		/*************************************************************/
 	case 0x18:		/* SLA+W has been transmitted, ACK has been received */
 		I2C_SetData(arduino.usart.buf[0]);
 		if (arduino.usart.isParkour) {
@@ -236,7 +274,6 @@ ISR(TWI_vect) {
 			I2C_Ack("NACK");
 		}
 		break;
-	/* case 0x20: break;/\* SLA+W has been transmitted, NOT ACK has been received *\/  << GEBRUIKEN WE NIET */
 	case 0x28:		/* Data byte has been transmitted, ACK has been received */
 		if (arduino.usart.bufIndex == USARTBUFLEN - 1 || !arduino.usart.buf[arduino.usart.bufIndex]){
 			I2C_Stop();
@@ -250,16 +287,17 @@ ISR(TWI_vect) {
 		I2C_Stop();
 		break;
 
-	/* SLA+R vanaf hier ******************************************/
+		/*************************************************************/
+		/*                           SLA+R                           */
+		/*************************************************************/
 	case 0x40:		/* SLA+R has been transmitted, ACK has been received */
 		I2C_Ack("ACK");
 		break;
 	case 0x48:		/* SLA+R has been transmitted, NOT ACK has been received */
 		break;
 	case 0x50:		/* Data has been received, ACK has been transmitted */
-		USART_Write(TWDR);
-		arduino.i2c.bufIndex++;
-		if (arduino.i2c.bufIndex < 10) {
+		arduino.i2c.buf[arduino.i2c.bufIndex++] = TWDR;
+		if (arduino.i2c.bufIndex < I2CBUFLEN) {
 			I2C_Ack("ACK");
 		} else {
 			I2C_Ack("NACK");
@@ -267,6 +305,7 @@ ISR(TWI_vect) {
 		}
 		break;
 	case 0x58:		/* Data has been received, NOT ACK has been transmitted */
+		USART_WriteDistance(&arduino);
 		I2C_Stop();
 		break;
 	}
