@@ -301,12 +301,17 @@ ISR(TIMER4_CAPT_vect) {
 /*****************************************************************************/
 
 ISR(TIMER3_COMPA_vect) {
-	if (arduino.pieper)
-		TCCR2B = (1 << CS00);
-	else
-		TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+	static uint8_t temp = 1;
 
-	arduino.pieper = !arduino.pieper;
+	if (arduino.pieper && temp) {
+		TCCR2B = (1 << CS00);
+		arduino.pieper = !arduino.pieper;
+	} else if (!arduino.pieper && !temp) {
+		TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
+		arduino.pieper = !arduino.pieper;
+	}
+
+	temp = !temp;
 }
 
 int main(void) {
