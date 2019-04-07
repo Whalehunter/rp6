@@ -12,10 +12,10 @@
 void i2c_init();
 void init_motors();
 void init_usart();
+void init_leds();
 void init_encoder_interrupt();
 void drive(char x);
 uint8_t timert(int x);
-void init_leds();
 void i2c_SetData(char data);
 void init_update_interval();
 
@@ -164,7 +164,7 @@ void RP6_Execute_Direction(RP6_Full * RP6) {
 void RP6_Execute_Blinker(RP6_Full * RP6) {
 	if (RP6->speed.cur > 0 && (RP6->dir == 'a' || RP6->dir == 'd')) {
 		if (RP6->dir == 'a') {
-			PORTC ^= (1 << PINC4); /* Toggle left blinker */
+			PORTC ^= (1 << PINC4);  /* Toggle left blinker */
 			PORTB &= ~(1 << PINB7); /* Disable right blinker */
 		} else {
 			PORTC &= ~(1 << PINC4); /* Disable left blinker */
@@ -175,7 +175,7 @@ void RP6_Execute_Blinker(RP6_Full * RP6) {
                 PORTB &= ~(1 << PINB7); /* Disable right blinker */
 	}
 
-	RP6->blinkerCount = 0; 	/* Reset blinker count */
+	RP6->blinkerCount = 0;
 }
 
 void RP6_Execute_Speed(RP6_Full * RP6) {
@@ -318,7 +318,7 @@ ISR(TIMER2_OVF_vect) {
         }
 }
 
-ISR(TIMER0_COMP_vect) // Interrupt Service Routine
+ISR(TIMER0_COMP_vect)
 {
         rp6.blinkerCount += 1;
 }
