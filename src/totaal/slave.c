@@ -13,6 +13,7 @@ void i2c_init();
 void init_motors();
 void init_usart();
 void init_leds();
+void init_bumpers();
 void init_encoder_interrupt();
 void drive(char x);
 uint8_t timert(int x);
@@ -189,6 +190,12 @@ static RP6_Full rp6 = {{0,0,0},	 /* Speed */
                        {0,0},	 /* Updates */
 		       {0,0,0}}; /* afstand links & rechts */
 
+void bumper() {
+	if ((PINC & (1 << PINC6) || (PINB & (1 << PINB0)))) {
+		RP6_SetDirection(&rp6, 's');
+	}
+}
+
 int main(void){
         cli();                  /* Disable global interrupts */
         init_motors();
@@ -196,10 +203,12 @@ int main(void){
         i2c_init();
         init_update_interval();
 	init_encoder_interrupt();
+	init_bumpers();
         sei();                  /* Enable global interrupts */
 
 	while(1) {
                 RP6_Execute(&rp6);
+		bumper();
         }
         return 0;
 }
@@ -279,6 +288,11 @@ void drive(char x) {
 		RP6_Execute_Speed(&rp6);
 		break;
         }
+}
+
+void init_bumpers() {
+	DDRB &= ~(1 << PINB0);
+	DDRC &= ~(1 << PINC6);
 }
 
 void init_update_interval() {
