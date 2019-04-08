@@ -191,13 +191,15 @@ void Sonar_Pulse() {
 /*****************************************************************************/
 
 void Pieper_Aan() {
+	DDRB |= (1 << PB4);
 	TCCR2A = (1 << COM2A0) | (1 << WGM21); /* OC2A on compare match & CTC */
+	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
 	OCR2A = 8;
+
 	TCCR3A = (1 << COM3A1) | (1 << COM3A0);
+	TCCR3B = (1 << CS32) | (1 << WGM32);
 	OCR3A = 31250;		/* 500ms output compare */
 	TIMSK3 = (1 << OCIE3A);
-	TCCR2B = (1 << CS22) | (1 << CS21) | (1 << CS20);
-	TCCR3B = (1 << CS32) | (1 << WGM32);
 }
 
 void Pieper_Uit() {
