@@ -15,7 +15,7 @@ void init_usart();
 void drive(char x);
 uint8_t timert(int x);
 void init_leds();
-void i2c_send(char data);
+void i2c_SetData(char data);
 void init_update_interval();
 
 /* If a setting needs updating in while loop *********************************/
@@ -189,17 +189,36 @@ int main(void){
 }
 
 ISR(TWI_vect) {
-
         switch(TWSR) {
-        case 0x80: // Addressed with own SLA+W; data received; ACK send
+		/*************************************************************/
+		/*                           SLA+W                           */
+		/*************************************************************/
+	case 0x60:		/* SLA+W received, ACK send */
+        case 0x80:		/* Data received, ACK send */
                 drive(TWDR);
+		/**
+		 * TODO:
+		 * Data schrijven naar array
+		 */
                 break;
-        case 0xA8: // Own SLA+R has been received; ACK has been returned
-        case 0xB8: // Data byte in TWDR has been send; ACK has been received
-                i2c_send(RP6_GetDirection(&rp6));
+	case 0xA0:    /* STOP received */
+		/**
+		 * TODO:
+		 * Uitvoeren van received bytes
+		 * drive(shit)
+		 */
+		break;
+		/*************************************************************/
+		/*                           SLA+R                           */
+		/*************************************************************/
+        case 0xA8:	    /* SLA+R received, ACK send */
+		i2c_SetData(RP6_GetDirection(&rp6));
+		break;
+        case 0xB8:	    /* Data transmitted, ACK received */
+		i2c_SetData('a');
                 break;
-        case 0xC0: // Data byte in TWDR has been send; NACK has been received
-                drive('0');
+        case 0xC0:		/* Data transmitted, NACK received */
+                /* drive('0'); */
                 break;
         }
         TWCR |= (1<<TWINT); // Clear TWINT Flag
@@ -211,7 +230,7 @@ void i2c_init() {
         TWCR = (1<<TWEA) | (1<<TWIE) | (1<<TWEN);
 }
 
-void i2c_send(char data) {
+void i2c_SetData(char data) {
         TWDR = data;
 }
 
@@ -234,8 +253,6 @@ void drive(char x) {
         case '1':
         case '2':
         case '3':
-                RP6_SetSpeed(&rp6, x);
-                break;
         case 'q':
                 RP6_SetSpeed(&rp6, x);
                 break;
