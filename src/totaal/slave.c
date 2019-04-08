@@ -20,11 +20,24 @@ uint8_t timert(int x);
 void i2c_SetData(char data);
 void init_update_interval();
 
+#define KEERAFSTAND 15
+
 /* If a setting needs updating in while loop *********************************/
 typedef struct {
         int speed;
         int dir;
+	int bumped;
 } RP6_Update;
+
+/* Bumper settings RP6 *******************************************************/
+typedef struct {
+	uint8_t kant;
+	uint16_t travelDistanceBump;
+	uint16_t travelDistanceTurn;
+	uint16_t travelDistanceSecondTurn;
+	uint16_t travelDistanceForward;
+	uint8_t currentPosition;
+} RP6_Bumper;
 
 /* Speed settings RP6 ********************************************************/
 typedef struct {
@@ -47,6 +60,7 @@ typedef struct {
         int blinkerCount;
         RP6_Update update;
 	RP6_Distance distance;
+	RP6_Bumper bump;
 } RP6_Full;
 
 void RP6_SetDistance(RP6_Full * RP6);			/* Update RP6 travel distance */
@@ -130,15 +144,49 @@ void RP6_SetCurrentSpeed(RP6_Full * RP6) {
 }
 
 void RP6_Execute(RP6_Full * RP6) {
-        if (RP6->update.dir) {
-                RP6_Execute_Direction(RP6);
-        }
-        if (RP6->blinkerCount > BLINK) {
-                RP6_Execute_Blinker(RP6);
-        }
-        if (RP6->update.speed) {
-                RP6_Execute_Speed(RP6);
-        }
+	if (RP6->update.bumped) {
+		RP6_SetDistance(RP6);
+
+		if (RP6_GetDirection(RP6) != '.' && RP6->bump.currentPosition == 0) {
+			RP6_SetDirection(RP6, 's');
+			RP6->bump.travelDistanceBump = RP6->distance.cm;
+			RP6->bump.currentPosition = 1;
+		} else if (RP6->distance.cm - RP6->bump.travelDistanceBump > 15 && RP6->bump.currentPosition == 1) {
+			if (RP6->bump.kant == 'r') {
+				RP6_SetDirection(RP6, 'a');
+			} else if (RP6->bump.kant == 'l'){
+				RP6_SetDirection(RP6, 'd');
+			}
+			RP6->bump.travelDistanceTurn = RP6->distance.cm;
+			RP6->bump.currentPosition = 2;
+		} else if (RP6->distance.cm - RP6->bump.travelDistanceTurn > KEERAFSTAND && RP6->bump.currentPosition == 2) {
+			RP6_SetDirection(RP6, 'w');
+			RP6->bump.travelDistanceForward = RP6->distance.cm;
+			RP6->bump.currentPosition = 3;
+		} else if (RP6->distance.cm - RP6->bump.travelDistanceForward > KEERAFSTAND && RP6->bump.currentPosition == 3) {
+			if (RP6->bump.kant == 'r') {
+				RP6_SetDirection(RP6, 'd');
+			} else {
+				RP6_SetDirection(RP6, 'a');
+			}
+			RP6->bump.travelDistanceSecondTurn = RP6->distance.cm;
+			RP6->bump.currentPosition = 4;
+		} else if (RP6->distance.cm - RP6->bump.travelDistanceSecondTurn > KEERAFSTAND && RP6->bump.currentPosition == 4) {
+			RP6_SetDirection(RP6, 'w');
+			RP6->bump.currentPosition = 0;
+			RP6->update.bumped = 0;
+		}
+	}
+
+	if (RP6->update.dir) {
+		RP6_Execute_Direction(RP6);
+	}
+	if (RP6->blinkerCount > BLINK) {
+		RP6_Execute_Blinker(RP6);
+	}
+	if (RP6->update.speed) {
+		RP6_Execute_Speed(RP6);
+	}
 }
 
 void RP6_Execute_Direction(RP6_Full * RP6) {
@@ -187,12 +235,18 @@ void RP6_Execute_Speed(RP6_Full * RP6) {
 static RP6_Full rp6 = {{0,0,0},	 /* Speed */
                        'w',	 /* Direction */
                        0,	 /* Blinker counter */
-                       {0,0},	 /* Updates */
-		       {0,0,0}}; /* afstand links & rechts */
+                       {0,0,0},  /* Updates */
+		       {0,0,0}, /* afstand links & rechts */
+		       {0,0,0,0,0,0}};	/* Bumper */
 
 void bumper() {
-	if ((PINC & (1 << PINC6) || (PINB & (1 << PINB0)))) {
-		RP6_SetDirection(&rp6, 's');
+	if (!rp6.update.bumped && ((PINC & (1 << PINC6)) || (PINB & (1 << PINB0)))) {
+		if ((PINC & (1 << PINC6))) {
+			rp6.bump.kant = 'r';
+		} else {
+			rp6.bump.kant = 'l';
+		}
+		rp6.update.bumped = 1;
 	}
 }
 
