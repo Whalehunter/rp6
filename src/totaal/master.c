@@ -21,6 +21,7 @@ typedef struct {
 typedef struct {
 	uint16_t start;
 	uint16_t end;
+	uint8_t print;
 } Arduino_Sonar;
 
 typedef struct {
@@ -163,7 +164,7 @@ void Sonar_Init() {
 	/* TCCR0B |= (1 << CS00); 	/\* Enable no prescaler TCNT0 *\/ */
 }
 
-uint8_t Sonar_GetDistance(Arduino_Full * a) {
+uint16_t Sonar_GetDistance(Arduino_Full * a) {
 	uint16_t distance = (((a->sonar.end - a->sonar.start) * 0.2704) - 14);
 	if (distance > 255) {
 		return 255;
@@ -211,7 +212,7 @@ void Pieper_Uit() {
 
 Arduino_Full arduino = {{"", 0, 0}, 	/* USART */
 			{0, "", 0},	/* I2C */
-			{0, 0},		/* SONAR */
+			{0, 0, 0},	/* SONAR */
 			1};		/* PIEPER */
 
 /*****************************************************************************/
@@ -248,6 +249,8 @@ ISR(USART0_RX_vect) {
 		arduino.i2c.type = 1; /* I2C SLA+R modus */
 		I2C_Start();
 		break;
+	case 'p':
+		arduino.sonar.print = !arduino.sonar.print;
 	}
 }
 
@@ -327,10 +330,24 @@ ISR(TIMER4_CAPT_vect) {
 	} else {		        /* Falling edge */
 		TCCR4B |= (1 << ICES4);
 		arduino.sonar.end = ICR4;
-		if (Sonar_GetDistance(&arduino) <= 8) {
-			arduino.i2c.buf[0] = '8';
+		uint16_t dist = Sonar_GetDistance(&arduino);
+		if (dist <= 8) {
+			arduino.usart.buf[0] = '8';
 			arduino.i2c.type = 0;
 			I2C_Start();
+		}
+		if (arduino.sonar.print) {
+			uint8_t str[] = "Afstand tot object:";
+			USART_WriteString(str);
+			uint8_t distance[10];
+			uitoa(dist, distance);
+
+			for (int i = 0; distance[i] != 0; ++i) {
+				USART_Write(distance[i]);
+			}
+			USART_Write('c');
+			USART_Write('m');
+			USART_WriteEOL();
 		}
 		TIMSK4 &= ~(1 << ICIE4); /* Disable ICR interrupt */
 	}
