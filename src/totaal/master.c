@@ -90,21 +90,22 @@ void USART_WriteEOL() {
 }
 
 void USART_WriteString(uint8_t s[]) {
-	for (int i = 0; i != 0; ++i) {
+	for (int i = 0; s[i] != 0; i++) {
 		USART_Write(s[i]);
 	}
 	USART_WriteEOL();
 }
 
 void USART_WriteDistance(Arduino_Full * ARDUINO) {
-	uint16_t num = (ARDUINO->usart.buf[0] << 8) | ARDUINO->usart.buf[1];
+	uint16_t num = (ARDUINO->i2c.buf[0] << 8) | ARDUINO->i2c.buf[1];
 	uint8_t i, distanceString[] = "De afgelegde afstand:", totalDistance[10];
-	uitoa(num, totalDistance);
 
+	uitoa(num, totalDistance);
 	USART_WriteString(distanceString);
-	for (i = 0; i != 0; ++i) {
+	for (i = 0; totalDistance[i] != 0; ++i) {
 		USART_Write(totalDistance[i]);
 	}
+
 	USART_Write('c');
 	USART_Write('m');
 	USART_WriteEOL();
