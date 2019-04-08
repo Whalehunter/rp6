@@ -64,7 +64,7 @@ void RP6_Execute_Blinker(RP6_Full * RP6);		/* Execute blinker toggles */
 void RP6_Execute_Speed(RP6_Full * RP6);			/* Execute RP6 speed */
 
 void RP6_SetDistance(RP6_Full * RP6) {
-	RP6->distance.cm = (RP6->distance.left + RP6->distance.right) * 0.05;
+	RP6->distance.cm = (RP6->distance.left + RP6->distance.right) * 0.0125;
 }
 
 void RP6_SetBlinker(RP6_Full * RP6) {
